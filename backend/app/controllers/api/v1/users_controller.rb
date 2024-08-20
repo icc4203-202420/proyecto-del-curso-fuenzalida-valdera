@@ -1,7 +1,7 @@
 class API::V1::UsersController < ApplicationController
   respond_to :json
   before_action :set_user, only: [:show, :update] 
-  before_action :authenticate_user!, only: [:create, :update, :destroy, :friendships :create_friendship]
+  before_action :authenticate_user!, only: [:create, :update, :destroy, :friendships, :create_friendship]
   
   def index
     @users = User.includes(:reviews, :address).all   
