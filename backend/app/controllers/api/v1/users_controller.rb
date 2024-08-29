@@ -1,23 +1,13 @@
 class API::V1::UsersController < ApplicationController
   respond_to :json
-<<<<<<< HEAD
   before_action :set_user, only: [:show, :update] 
   before_action :authenticate_user!, only: [:create, :update, :destroy, :friendships, :create_friendship]
-=======
-  before_action :set_user, only: [:show, :update]  
->>>>>>> upstream/main
   
   def index
     @users = User.includes(:reviews, :address).all   
   end
 
-<<<<<<< HEAD
   def show ; end
-=======
-  def show
-  
-  end
->>>>>>> upstream/main
 
   def create
     @user = User.new(user_params)
@@ -37,7 +27,6 @@ class API::V1::UsersController < ApplicationController
     end
   end
 
-<<<<<<< HEAD
   def friendships
     @friendships = @user.friendships.include(:friend)
     friends = @friendships.map(&:friend)
@@ -60,8 +49,6 @@ class API::V1::UsersController < ApplicationController
     end
   end
 
-=======
->>>>>>> upstream/main
   private
 
   def set_user
