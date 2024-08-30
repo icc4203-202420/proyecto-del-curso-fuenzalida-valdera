@@ -12,7 +12,7 @@ const Events = () => {
 
   return (
     <div>
-      <h2>Events for Bar {id}</h2>
+      <h1>Events for Bar {id}</h1>
       <ul>
         {events.map(event => (<li key={event.id}>{event.name}</li>))}
       </ul>

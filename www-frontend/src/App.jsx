@@ -2,13 +2,14 @@ import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import {
   AppBar, Toolbar, Typography, IconButton, Drawer, List, ListItem, Container,
-  ListItemIcon, ListItemText, BottomNavigation, BottomNavigationAction, Paper
+  ListItemIcon, ListItemText
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import HomeIcon from '@mui/icons-material/Home';
 import LocalBarIcon from '@mui/icons-material/LocalBar';
 import EventIcon from '@mui/icons-material/Event';
 import SearchIcon from '@mui/icons-material/Search';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import Home from './components/Home';
 import BarList from './components/BarList';
 import BeerList from './components/BeerList';
@@ -18,7 +19,6 @@ import './App.css';
 
 function App() {
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [navigationValue, setNavigationValue] = useState(0);
 
   const toggleDrawer = (open) => (event) => {
     if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
@@ -29,43 +29,56 @@ function App() {
 
   return (
     <Router>
-      <AppBar position="static">
+      <AppBar position="fixed" style={{ width: '100%', height: '64px', backgroundColor: '#FFEB3B' }}>
         <Toolbar>
           <IconButton edge="start" color="inherit" aria-label="menu" onClick={toggleDrawer(true)}>
-            <MenuIcon />
+            <MenuIcon style={{ color: 'black' }} />
           </IconButton>
-          <Typography variant="h6" style={{ flexGrow: 1 }}>
-            My App
+          <Typography variant="h6" style={{ flexGrow: 1, color: 'black' }}>
+            Pintpals
           </Typography>
+          <IconButton edge="end" color="inherit" aria-label="profile">
+            <AccountCircleIcon style={{ color: 'black' }} />
+          </IconButton>
         </Toolbar>
       </AppBar>
       
-      <Drawer anchor="left" open={drawerOpen} onClose={toggleDrawer(false)}>
+      <Drawer 
+        anchor="left" 
+        open={drawerOpen} 
+        onClose={toggleDrawer(false)}
+        PaperProps={{
+          style: {
+            backgroundColor: '#FFEB3B',
+            color: 'black'
+          }
+        }}
+      >
         <List>
-          <ListItem button component={Link} to="/" onClick={toggleDrawer(false)}>
-            <ListItemIcon><HomeIcon /></ListItemIcon>
+          <ListItem button component={Link} to="/" onClick={toggleDrawer(false)} style={{color: 'black'}}>
+            <ListItemIcon><HomeIcon style={{ color: 'black' }} /></ListItemIcon>
             <ListItemText primary="Home" />
           </ListItem>
-          <ListItem button component={Link} to="/beers" onClick={toggleDrawer(false)}>
-            <ListItemIcon><LocalBarIcon /></ListItemIcon>
+          <ListItem button component={Link} to="/beers" onClick={toggleDrawer(false)} style={{color: 'black'}}>
+            <ListItemIcon><LocalBarIcon style={{ color: 'black' }} /></ListItemIcon>
             <ListItemText primary="Beers" />
           </ListItem>
-          <ListItem button component={Link} to="/bars" onClick={toggleDrawer(false)}>
-            <ListItemIcon><LocalBarIcon /></ListItemIcon>
+          <ListItem button component={Link} to="/bars" onClick={toggleDrawer(false)} style={{color: 'black'}}>
+            <ListItemIcon><LocalBarIcon style={{ color: 'black' }} /></ListItemIcon>
             <ListItemText primary="Bars" />
           </ListItem>
-          <ListItem button component={Link} to="/bars/1/events" onClick={toggleDrawer(false)}>
-            <ListItemIcon><EventIcon /></ListItemIcon>
+          <ListItem button component={Link} to="/bars/1/events" onClick={toggleDrawer(false)} style={{color: 'black'}}>
+            <ListItemIcon><EventIcon style={{ color: 'black' }} /></ListItemIcon>
             <ListItemText primary="Events" />
           </ListItem>
-          <ListItem button component={Link} to="/search" onClick={toggleDrawer(false)}>
-            <ListItemIcon><SearchIcon /></ListItemIcon>
+          <ListItem button component={Link} to="/search" onClick={toggleDrawer(false)} style={{color: 'black'}}>
+            <ListItemIcon><SearchIcon style={{ color: 'black' }} /></ListItemIcon>
             <ListItemText primary="Search Users" />
           </ListItem>
         </List>
       </Drawer>
       
-      <Container>
+      <Container style={{ marginTop: '64px', minHeight: 'calc(100vh - 64px)' }}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/beers" element={<BeerList />} />
@@ -74,19 +87,6 @@ function App() {
           <Route path="/search" element={<UserSearch />} />
         </Routes>
       </Container>
-      
-      <Paper sx={{ position: 'fixed', bottom: 0, left: 0, right: 0 }} elevation={3}>
-        <BottomNavigation
-          showLabels
-          value={navigationValue}
-          onChange={(event, newValue) => setNavigationValue(newValue)}
-        >
-          <BottomNavigationAction label="Home" icon={<HomeIcon />} component={Link} to="/" />
-          <BottomNavigationAction label="Beers" icon={<LocalBarIcon />} component={Link} to="/beers" />
-          <BottomNavigationAction label="Bars" icon={<LocalBarIcon />} component={Link} to="/bars" />
-          <BottomNavigationAction label="Events" icon={<EventIcon />} component={Link} to="/bars/1/events" />
-        </BottomNavigation>
-      </Paper>
     </Router>
   );
 }

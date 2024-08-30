@@ -10,7 +10,7 @@ const BeerList = () => {
 
   return (
     <div>
-      <h2>Beer List</h2>
+      <h1>Beer List</h1>
       <ul>
         {beers.map(beer => (<li key={beer.id}>{beer.name}</li>))}
       </ul>

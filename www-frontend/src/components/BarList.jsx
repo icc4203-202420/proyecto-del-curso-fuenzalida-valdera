@@ -10,7 +10,7 @@ const BarList = () => {
 
   return (
     <div>
-      <h2>Bar List</h2>
+      <h1>Bar List</h1>
       <ul>
         {bars.map(bar => (<li key={bar.id}>{bar.name}</li>))}
       </ul>
