@@ -23,7 +23,6 @@ Rails.application.routes.draw do
     namespace :v1 do
       resources :bars
       resources :beers
-<<<<<<< HEAD
       resources :events, only: [:show, :create, :update, :destroy]
       resources :users do
         resources :reviews, only: [:index]
@@ -31,12 +30,8 @@ Rails.application.routes.draw do
           get 'friendships', to: 'users#friendships'
           post 'friendships', to: 'users#create_friendship'
         end
-=======
-      resources :users do
-        resources :reviews, only: [:index]
->>>>>>> upstream/main
       end
-      
+
       resources :reviews, only: [:index, :show, :create, :update, :destroy]
     end
   end
