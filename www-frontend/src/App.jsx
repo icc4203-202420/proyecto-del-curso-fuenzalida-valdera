@@ -1,31 +1,39 @@
-import React, { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import React, { useState } from 'react'
+import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom'
 import {
   AppBar, Toolbar, Typography, IconButton, Drawer, List, ListItem, Container,
   ListItemIcon, ListItemText
-} from '@mui/material';
-import MenuIcon from '@mui/icons-material/Menu';
-import HomeIcon from '@mui/icons-material/Home';
-import LocalBarIcon from '@mui/icons-material/LocalBar';
-import EventIcon from '@mui/icons-material/Event';
-import SearchIcon from '@mui/icons-material/Search';
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import Home from './components/Home';
-import BarList from './components/BarList';
-import BeerList from './components/BeerList';
-import Events from './components/Events';
-import UserSearch from './components/UserSearch';
-import './App.css';
+} from '@mui/material'
+import MenuIcon from '@mui/icons-material/Menu'
+import HomeIcon from '@mui/icons-material/Home'
+import LocalBarIcon from '@mui/icons-material/LocalBar'
+import EventIcon from '@mui/icons-material/Event'
+import SearchIcon from '@mui/icons-material/Search'
+import AccountCircleIcon from '@mui/icons-material/AccountCircle'
+import LogoutIcon from '@mui/icons-material/Logout'
+import Home from './components/Home'
+import BarList from './components/BarList'
+import BeerList from './components/BeerList'
+import Events from './components/Events'
+import UserSearch from './components/UserSearch'
+import Login from './components/Login'
+import Register from './components/Register'
+import './App.css'
 
 function App() {
-  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
 
   const toggleDrawer = (open) => (event) => {
     if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
-      return;
+      return
     }
-    setDrawerOpen(open);
-  };
+    setDrawerOpen(open)
+  }
+
+  const handleLogout = () => {
+    setIsAuthenticated(false)
+  }
 
   return (
     <Router>
@@ -37,9 +45,15 @@ function App() {
           <Typography variant="h6" style={{ flexGrow: 1, color: 'black' }}>
             Pintpals
           </Typography>
-          <IconButton edge="end" color="inherit" aria-label="profile">
-            <AccountCircleIcon style={{ color: 'black' }} />
-          </IconButton>
+          {isAuthenticated ? (
+            <IconButton edge="end" color="inherit" aria-label="logout" onClick={handleLogout}>
+              <LogoutIcon style={{ color: 'black' }} />
+            </IconButton>
+          ) : (
+            <IconButton edge="end" color="inherit" aria-label="login" component={Link} to="/login">
+              <AccountCircleIcon style={{ color: 'black' }} />
+            </IconButton>
+          )}
         </Toolbar>
       </AppBar>
       
@@ -85,10 +99,13 @@ function App() {
           <Route path="/bars" element={<BarList />} />
           <Route path="/bars/:id/events" element={<Events />} />
           <Route path="/search" element={<UserSearch />} />
+          <Route path="/login" element={<Login setIsAuthenticated={setIsAuthenticated} />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/logout" element={<Navigate to="/" />} />
         </Routes>
       </Container>
     </Router>
-  );
+  )
 }
 
-export default App;
+export default App
