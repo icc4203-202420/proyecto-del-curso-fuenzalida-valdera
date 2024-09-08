@@ -1,4 +1,4 @@
-class API::v1::EventsController < ApplicationController
+class API::V1::EventsController < ApplicationController
   include ImageProcessing
   include Authenticable
 
