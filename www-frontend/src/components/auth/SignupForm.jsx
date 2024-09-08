@@ -39,7 +39,7 @@ const Signup = () => {
         },
       })
 
-      setSuccess('Welcome to PinPals!')
+      setSuccess('Welcome to PintPals!')
       setError('')
     } catch (err) {
       setError('Something went wrong :/')

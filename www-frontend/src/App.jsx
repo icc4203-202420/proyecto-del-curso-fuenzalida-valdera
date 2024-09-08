@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom'
+import React, { useState, useEffect } from 'react'
+import { BrowserRouter as Router, Routes, Route, Link, Navigate, useNavigate, useLocation } from 'react-router-dom'
 import {
   AppBar, Toolbar, Typography, IconButton, Drawer, List, ListItem, Container,
   ListItemIcon, ListItemText
@@ -18,6 +18,7 @@ import Events from './components/Events'
 import UserSearch from './components/UserSearch'
 import Login from './components/Login'
 import Register from './components/Register'
+import Map from './components/Map'
 import './App.css'
 
 function App() {
@@ -35,8 +36,26 @@ function App() {
     setIsAuthenticated(false)
   }
 
+  const navigate = useNavigate()
+  const location = useLocation()
+
+  useEffect(() => {
+    const token = localStorage.getItem('token')
+    console.log('Token:', token)
+    console.log('IsAuthenticated:', isAuthenticated)
+    console.log('Current Path:', location.pathname)
+
+    if (!isAuthenticated && !['/login', '/signup', '/register'].includes(location.pathname) && !token) {
+      navigate('/')
+    }
+  }, [isAuthenticated, location.pathname, navigate])
+
+  const handleChange = (menu, newValue) => {
+    setValue(newValue)
+  }
+
   return (
-    <Router>
+    <>
       <AppBar position="fixed" style={{ width: '100%', height: '64px', backgroundColor: '#FFEB3B' }}>
         <Toolbar>
           <IconButton edge="start" color="inherit" aria-label="menu" onClick={toggleDrawer(true)}>
@@ -45,15 +64,6 @@ function App() {
           <Typography variant="h6" style={{ flexGrow: 1, color: 'black' }}>
             Pintpals
           </Typography>
-          {isAuthenticated ? (
-            <IconButton edge="end" color="inherit" aria-label="logout" onClick={handleLogout}>
-              <LogoutIcon style={{ color: 'black' }} />
-            </IconButton>
-          ) : (
-            <IconButton edge="end" color="inherit" aria-label="login" component={Link} to="/login">
-              <AccountCircleIcon style={{ color: 'black' }} />
-            </IconButton>
-          )}
         </Toolbar>
       </AppBar>
       
@@ -69,9 +79,9 @@ function App() {
         }}
       >
         <List>
-          <ListItem button component={Link} to="/" onClick={toggleDrawer(false)} style={{color: 'black'}}>
+          <ListItem button component={Link} to="/map" onClick={toggleDrawer(false)} style={{color: 'black'}}>
             <ListItemIcon><HomeIcon style={{ color: 'black' }} /></ListItemIcon>
-            <ListItemText primary="Home" />
+            <ListItemText primary="Home/Map" />
           </ListItem>
           <ListItem button component={Link} to="/beers" onClick={toggleDrawer(false)} style={{color: 'black'}}>
             <ListItemIcon><LocalBarIcon style={{ color: 'black' }} /></ListItemIcon>
@@ -100,11 +110,12 @@ function App() {
           <Route path="/bars/:id/events" element={<Events />} />
           <Route path="/search" element={<UserSearch />} />
           <Route path="/login" element={<Login setIsAuthenticated={setIsAuthenticated} />} />
-          <Route path="/register" element={<Register />} />
+          <Route path="/register" element={<Register setIsAuthenticated={setIsAuthenticated} />} />
           <Route path="/logout" element={<Navigate to="/" />} />
+          <Route path="/map" element={<Map />} />
         </Routes>
       </Container>
-    </Router>
+    </>
   )
 }
 
