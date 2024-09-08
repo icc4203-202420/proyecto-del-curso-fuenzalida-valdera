@@ -1,99 +1,51 @@
-import React, { useState } from 'react'
-import axios from 'axios'
-import { TextField, Button, Typography, Container, Paper } from '@mui/material'
-import { useNavigate } from 'react-router-dom'
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const Login = ({ setIsAuthenticated }) => {
-  const [formData, setFormData] = useState({ email: '', password: '' })
-  const [errors, setErrors] = useState({})
-  const [successMessage, setSuccessMessage] = useState('')
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const navigate = useNavigate();
 
-  const navigate = useNavigate()
+  const handleLogin = async (e) => {
+    e.preventDefault();
 
-  const handleClick = () => {
-    navigate('/register')
-  }
+    const token = "token_obtenido_del_servidor";
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value })
-  }
-
-  const validateForm = () => {
-    const newErrors = {}
-    if (!formData.email) {
-      newErrors.email = 'Email is required'
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Email format is invalid'
+    if (token) {
+      localStorage.setItem('token', token);
+      setIsAuthenticated(true);
+      navigate('/map');
+    } else {
+      console.log("Auth error");
     }
-
-    if (!formData.password) {
-      newErrors.password = 'Password is required'
-    }
-
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
-
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    setErrors({})
-    setSuccessMessage('')
-
-    if (!validateForm()) {
-      return
-    }
-
-    try {
-      const response = await axios.post('/api/v1/login', formData)
-      setIsAuthenticated(true)
-      setSuccessMessage('Welcome back!')
-      window.location.href = '/'
-    } catch (error) {
-      if (error.response && error.response.data) {
-        setErrors({ apiError: error.response.data.message || 'Invalid email or password' })
-      } else {
-        setErrors({ apiError: 'Something went wrong. Please try again later.' })
-      }
-    }
-  }
+  };
 
   return (
-    <Container component={Paper} maxWidth="xs" style={{ padding: '2rem', marginTop: '2rem', backgroundColor: '#fff' }}>
-      <Typography variant="h5" align="center" gutterBottom>Login</Typography>
-      <form onSubmit={handleSubmit}>
-        <TextField
-          label="Email"
-          name="email"
-          type="email"
-          fullWidth
-          margin="normal"
-          value={formData.email}
-          onChange={handleChange}
-          error={!!errors.email}
-          helperText={errors.email}
-          required
-        />
-        <TextField
-          label="Password"
-          name="password"
-          type="password"
-          fullWidth
-          margin="normal"
-          value={formData.password}
-          onChange={handleChange}
-          error={!!errors.password}
-          helperText={errors.password}
-          required
-        />
-        <Button type="submit" variant="contained" color="primary" fullWidth>Login</Button>
-        {errors.apiError && <Typography color="error" align="center" style={{ marginTop: '1rem' }}>{errors.apiError}</Typography>}
-        {successMessage && <Typography color="primary" align="center" style={{ marginTop: '1rem' }}>{successMessage}</Typography>}
-        <Button variant="contained" color="primary" fullWidth onClick={handleClick}>
-          Register
-        </Button>
+    <div>
+      <h2>Login</h2>
+      <form onSubmit={handleLogin}>
+        <div>
+          <label>Email:</label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label>Password:</label>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+        </div>
+        <button type="submit">Login</button>
       </form>
-    </Container>
-  )
-}
+    </div>
+  );
+};
 
-export default Login
+export default Login;
