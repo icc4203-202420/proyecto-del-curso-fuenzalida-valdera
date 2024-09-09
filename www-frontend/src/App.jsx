@@ -23,19 +23,13 @@ const App = () => {
   const location = useLocation()
 
   useEffect(() => {
-    const token = localStorage.getItem('token')
-    if (token) {
-      setIsAuthenticated(true)
-    }
+    const token = sessionStorage.getItem('jwtToken')
+    setIsAuthenticated(!!token)
   }, [])
 
   useEffect(() => {
-    const token = localStorage.getItem('token')
-    
-    if (!isAuthenticated && !token) {
-      if (!['/login', '/signup', '/register'].includes(location.pathname)) {
-        navigate('/')
-      }
+    if (!isAuthenticated && location.pathname !== '/login' && location.pathname !== '/register') {
+      navigate('/login')
     } else if (isAuthenticated && (location.pathname === '/login' || location.pathname === '/register')) {
       navigate('/map')
     }
@@ -49,9 +43,9 @@ const App = () => {
   }
 
   const handleLogout = () => {
-    localStorage.removeItem('token')
+    sessionStorage.removeItem('jwtToken')
     setIsAuthenticated(false)
-    navigate('/')
+    navigate('/login')
   }
 
   return (
