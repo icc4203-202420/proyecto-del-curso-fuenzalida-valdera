@@ -15,7 +15,7 @@ const BeerList = () => {
     const fetchBeers = async () => {
       try {
         const response = await axios.get('http://localhost:3001/api/v1/beers')
-        setBeers(response.data.beers)  // Asegúrate de acceder al array
+        setBeers(response.data.beers)
         setFilteredBeers(response.data.beers)
       } catch (err) {
         setError('Failed to load beers')

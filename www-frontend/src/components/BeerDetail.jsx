@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Container, Typography, Button, CircularProgress, TextField } from '@mui/material'
+import { Container, Typography, CircularProgress } from '@mui/material'
 import ReviewForm from './ReviewForm'
 import { useParams } from 'react-router-dom'
 
@@ -17,10 +17,10 @@ const BeerDetail = () => {
           const data = await response.json()
           setBeer(data)
         } else {
-          setError('Something went wrong')
+          setError('Failed to load beer details')
         }
       } catch (error) {
-        setError('Error')
+        setError(`Error: ${error.message}`)
       } finally {
         setLoading(false)
       }
@@ -31,6 +31,8 @@ const BeerDetail = () => {
 
   if (loading) return <CircularProgress />
   if (error) return <Typography color="error">{error}</Typography>
+
+  if (!beer) return <Typography>No details available for this beer.</Typography>
 
   return (
     <Container>

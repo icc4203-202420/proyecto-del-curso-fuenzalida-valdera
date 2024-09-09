@@ -18,7 +18,7 @@ const ReviewForm = ({ beerId }) => {
       return
     }
     try {
-      await axios.post('/api/v1/reviews', { rating, text, beer_id: beerId })
+      await axios.post('http://localhost:3001/api/v1/reviews', { rating, text, beer_id: beerId })
       setRating('')
       setText('')
       setError('')
