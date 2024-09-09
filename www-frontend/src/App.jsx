@@ -6,7 +6,6 @@ import HomeIcon from '@mui/icons-material/Home'
 import LocalBarIcon from '@mui/icons-material/LocalBar'
 import EventIcon from '@mui/icons-material/Event'
 import SearchIcon from '@mui/icons-material/Search'
-import AccountCircleIcon from '@mui/icons-material/AccountCircle'
 import LogoutIcon from '@mui/icons-material/Logout'
 import Home from './components/Home'
 import Login from './components/Login'
@@ -52,7 +51,7 @@ const App = () => {
   const handleLogout = () => {
     localStorage.removeItem('token')
     setIsAuthenticated(false)
-    navigate('/login')
+    navigate('/')
   }
 
   return (
@@ -113,18 +112,26 @@ const App = () => {
         </Drawer>
       )}
       
-      <Container style={{ marginTop: '64px', minHeight: 'calc(100vh - 64px)' }}>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/beers" element={isAuthenticated ? <BeerList /> : <Navigate to="/login" />} />
-          <Route path="/bars" element={isAuthenticated ? <BarList /> : <Navigate to="/login" />} />
-          <Route path="/bars/:id/events" element={isAuthenticated ? <Events /> : <Navigate to="/login" />} />
-          <Route path="/search" element={isAuthenticated ? <UserSearch /> : <Navigate to="/login" />} />
-          <Route path="/login" element={<Login setIsAuthenticated={setIsAuthenticated} />} />
-          <Route path="/register" element={<Register setIsAuthenticated={setIsAuthenticated} />} />
-          <Route path="/map" element={isAuthenticated ? <Map /> : <Navigate to="/login" />} />
-          <Route path="/logout" element={<Navigate to="/" />} />
-        </Routes>
+      <Container style={{ 
+        marginTop: '64px', 
+        minHeight: 'calc(100vh - 64px)', 
+        display: 'flex', 
+        justifyContent: 'center',
+        padding: '0 16px'
+      }}>
+        <div style={{ width: '100%', maxWidth: '1200px' }}>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/beers" element={isAuthenticated ? <BeerList /> : <Navigate to="/login" />} />
+            <Route path="/bars" element={isAuthenticated ? <BarList /> : <Navigate to="/login" />} />
+            <Route path="/bars/:id/events" element={isAuthenticated ? <Events /> : <Navigate to="/login" />} />
+            <Route path="/search" element={isAuthenticated ? <UserSearch /> : <Navigate to="/login" />} />
+            <Route path="/login" element={<Login setIsAuthenticated={setIsAuthenticated} />} />
+            <Route path="/register" element={<Register setIsAuthenticated={setIsAuthenticated} />} />
+            <Route path="/map" element={isAuthenticated ? <Map /> : <Navigate to="/login" />} />
+            <Route path="/logout" element={<Navigate to="/" />} />
+          </Routes>
+        </div>
       </Container>
     </>
   )
