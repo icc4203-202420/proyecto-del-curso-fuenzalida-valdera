@@ -12,7 +12,7 @@ const BeerDetail = () => {
   useEffect(() => {
     const fetchBeer = async () => {
       try {
-        const response = await fetch(`/api/v1/beers/${id}`)
+        const response = await fetch(`http://localhost:3001/api/v1/beers/${id}`)
         if (response.ok) {
           const data = await response.json()
           setBeer(data)

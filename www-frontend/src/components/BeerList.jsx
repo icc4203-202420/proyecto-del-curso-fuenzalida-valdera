@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
-import { TextField, Card, CardContent, CardActions, Typography, Button, Grid, Rating } from '@mui/material'
+import axios from 'axios'
+import { TextField, Card, CardContent, CardActions, Typography, Button, Grid, Rating, CircularProgress } from '@mui/material'
 import BeerIcon from '@mui/icons-material/LocalBar'
 import { Link } from 'react-router-dom'
 
@@ -7,22 +8,23 @@ const BeerList = () => {
   const [beers, setBeers] = useState([])
   const [search, setSearch] = useState('')
   const [filteredBeers, setFilteredBeers] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
 
   useEffect(() => {
-    const exampleBeers = [
-      {
-        id: 1,
-        name: 'Golden Ale',
-        beer_type: 'Ale',
-        style: 'Golden Ale',
-        ibu: 30,
-        alcohol: '5.0%',
-        avg_rating: 4.0,
-        description: 'A refreshing golden ale with a hint of citrus and a crisp finish.'
+    const fetchBeers = async () => {
+      try {
+        const response = await axios.get('http://localhost:3001/api/v1/beers')
+        setBeers(response.data.beers)  // Asegúrate de acceder al array
+        setFilteredBeers(response.data.beers)
+      } catch (err) {
+        setError('Failed to load beers')
+      } finally {
+        setLoading(false)
       }
-    ]
-    setBeers(exampleBeers)
-    setFilteredBeers(exampleBeers)
+    }
+
+    fetchBeers()
   }, [])
 
   useEffect(() => {
@@ -30,6 +32,13 @@ const BeerList = () => {
       beers.filter(beer => beer.name.toLowerCase().includes(search.toLowerCase()))
     )
   }, [search, beers])
+
+  if (loading) return <CircularProgress />
+  if (error) return <Typography color="error">{error}</Typography>
+
+  if (!Array.isArray(filteredBeers)) {
+    return <Typography color="error">Unexpected data format</Typography>
+  }
 
   return (
     <div>
