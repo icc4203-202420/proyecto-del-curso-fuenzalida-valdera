@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react'
-import axios from 'axios'
-import { TextField, Card, CardContent, CardActions, Typography, IconButton, Button, Grid, Rating } from '@mui/material'
+import { TextField, Card, CardContent, CardActions, Typography, Button, Grid, Rating } from '@mui/material'
 import BeerIcon from '@mui/icons-material/LocalBar'
-import { Link } from 'react-router-dom' // Importar Link para la navegación
+import { Link } from 'react-router-dom'
 
 const BeerList = () => {
   const [beers, setBeers] = useState([])
@@ -10,12 +9,15 @@ const BeerList = () => {
   const [filteredBeers, setFilteredBeers] = useState([])
 
   useEffect(() => {
-    // Aquí debes reemplazar con la llamada a la API real para obtener cervezas
     const exampleBeers = [
       {
         id: 1,
         name: 'Golden Ale',
-        rating: 4,
+        beer_type: 'Ale',
+        style: 'Golden Ale',
+        ibu: 30,
+        alcohol: '5.0%',
+        avg_rating: 4.0,
         description: 'A refreshing golden ale with a hint of citrus and a crisp finish.'
       }
     ]
@@ -52,7 +54,7 @@ const BeerList = () => {
                 </Typography>
                 <Rating
                   name="read-only"
-                  value={beer.rating}
+                  value={beer.avg_rating}
                   readOnly
                   style={{ marginBottom: '8px' }}
                 />
@@ -60,12 +62,21 @@ const BeerList = () => {
                   {beer.description}
                 </Typography>
               </CardContent>
-              <CardActions>
+              <CardActions style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                 <Button size="small" variant="outlined">
-                  <Link to={`/beers/${beer.id}`}>View Reviews</Link>
+                  <Link to={`/beers/${beer.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                    View Reviews
+                  </Link>
                 </Button>
                 <Button size="small" variant="outlined">
-                  <Link to={`/beers/${beer.id}`}>Add Review</Link>
+                  <Link to={`/beers/${beer.id}/add-review`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                    Add Review
+                  </Link>
+                </Button>
+                <Button size="small" variant="contained" style={{ marginTop: '8px' }}>
+                  <Link to={`/beers/${beer.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                    See Details
+                  </Link>
                 </Button>
               </CardActions>
             </Card>
