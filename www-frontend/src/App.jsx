@@ -15,6 +15,7 @@ import BeerList from './components/BeerList'
 import BarList from './components/BarList'
 import Events from './components/Events'
 import UserSearch from './components/UserSearch'
+import BeerDetail from './components/BeerDetail'
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -123,6 +124,7 @@ const App = () => {
             <Route path="/login" element={<Login setIsAuthenticated={setIsAuthenticated} />} />
             <Route path="/register" element={<Register setIsAuthenticated={setIsAuthenticated} />} />
             <Route path="/map" element={isAuthenticated ? <Map /> : <Navigate to="/login" />} />
+            <Route path="/beers/:id" element={isAuthenticated ? <BeerDetail /> : <Navigate to="/login" />} />
             <Route path="/logout" element={<Navigate to="/" />} />
           </Routes>
         </div>

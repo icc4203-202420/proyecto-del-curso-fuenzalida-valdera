@@ -1,14 +1,16 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { TextField, Card, CardContent, CardActions, Typography, IconButton, Button, Grid, Rating } from '@mui/material';
-import BeerIcon from '@mui/icons-material/LocalBar';
+import React, { useEffect, useState } from 'react'
+import axios from 'axios'
+import { TextField, Card, CardContent, CardActions, Typography, IconButton, Button, Grid, Rating } from '@mui/material'
+import BeerIcon from '@mui/icons-material/LocalBar'
+import { Link } from 'react-router-dom' // Importar Link para la navegación
 
 const BeerList = () => {
-  const [beers, setBeers] = useState([]);
-  const [search, setSearch] = useState('');
-  const [filteredBeers, setFilteredBeers] = useState([]);
+  const [beers, setBeers] = useState([])
+  const [search, setSearch] = useState('')
+  const [filteredBeers, setFilteredBeers] = useState([])
 
   useEffect(() => {
+    // Aquí debes reemplazar con la llamada a la API real para obtener cervezas
     const exampleBeers = [
       {
         id: 1,
@@ -16,16 +18,16 @@ const BeerList = () => {
         rating: 4,
         description: 'A refreshing golden ale with a hint of citrus and a crisp finish.'
       }
-    ];
-    setBeers(exampleBeers);
-    setFilteredBeers(exampleBeers);
-  }, []);
+    ]
+    setBeers(exampleBeers)
+    setFilteredBeers(exampleBeers)
+  }, [])
 
   useEffect(() => {
     setFilteredBeers(
       beers.filter(beer => beer.name.toLowerCase().includes(search.toLowerCase()))
-    );
-  }, [search, beers]);
+    )
+  }, [search, beers])
 
   return (
     <div>
@@ -59,15 +61,19 @@ const BeerList = () => {
                 </Typography>
               </CardContent>
               <CardActions>
-                <Button size="small" variant="outlined">View Reviews</Button>
-                <Button size="small" variant="outlined">Add Review</Button>
+                <Button size="small" variant="outlined">
+                  <Link to={`/beers/${beer.id}`}>View Reviews</Link>
+                </Button>
+                <Button size="small" variant="outlined">
+                  <Link to={`/beers/${beer.id}`}>Add Review</Link>
+                </Button>
               </CardActions>
             </Card>
           </Grid>
         ))}
       </Grid>
     </div>
-  );
-};
+  )
+}
 
-export default BeerList;
+export default BeerList
