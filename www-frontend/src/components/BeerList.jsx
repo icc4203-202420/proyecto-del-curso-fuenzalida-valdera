@@ -73,7 +73,7 @@ const BeerList = () => {
               </CardContent>
               <CardActions style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                 <Button size="small" variant="outlined">
-                  <Link to={`/beers/${beer.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                  <Link to={`/beers/${beer.id}/reviews`} style={{ textDecoration: 'none', color: 'inherit' }}>
                     View Reviews
                   </Link>
                 </Button>
