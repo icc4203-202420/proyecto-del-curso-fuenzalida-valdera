@@ -29,12 +29,10 @@ const Login = () => {
         const receivedToken = response.data.token
         sessionStorage.setItem('jwtToken', receivedToken)
         setServerError('')
-        setIsAuthenticated(true)
-        
-        // Verificar si el token se guarda correctamente
         const storedToken = sessionStorage.getItem('jwtToken')
         if (storedToken) {
           navigate('/map')
+          window.location.reload()
         } else {
           console.error('Token not stored in sessionStorage')
         }
@@ -44,13 +42,13 @@ const Login = () => {
       if (err.response && err.response.status === 401) {
         setServerError('Incorrect password or email')
       } else {
-        setServerError('Server error. Please try again later.')
+        setServerError('Server error. Please try again later or refresh the page.')
       }
       console.error('Form submit error:', err)
     } finally {
       setSubmitting(false)
     }
-  }
+  }  
 
   return (
     <Container component={Paper} maxWidth="xs" style={{ padding: '2rem', marginTop: '2rem', backgroundColor: '#fff' }}>

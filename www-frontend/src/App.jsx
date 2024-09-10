@@ -13,12 +13,12 @@ import Register from './components/Register'
 import Map from './components/Map'
 import BeerList from './components/BeerList'
 import BarList from './components/BarList'
-import Events from './components/Events'
 import UserSearch from './components/UserSearch'
 import BeerDetail from './components/BeerDetail'
 import ReviewForm from './components/ReviewForm'
 import BeerReviews from './components/BeerReviews'
 import BarDetail from './components/BarDetail'
+import EventBar from './components/EventBar'
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -94,7 +94,7 @@ const App = () => {
               <ListItemIcon><LocalBarIcon style={{ color: 'black' }} /></ListItemIcon>
               <ListItemText primary="Bars" />
             </ListItem>
-            <ListItem button component={Link} to="/bars/1/events" onClick={toggleDrawer(false)} style={{color: 'black'}}>
+            <ListItem button component={Link} to="/bars" onClick={toggleDrawer(false)} style={{color: 'black'}}>
               <ListItemIcon><EventIcon style={{ color: 'black' }} /></ListItemIcon>
               <ListItemText primary="Events" />
             </ListItem>
@@ -122,15 +122,15 @@ const App = () => {
             <Route path="/" element={<Home />} />
             <Route path="/beers" element={isAuthenticated ? <BeerList /> : <Navigate to="/login" />} />
             <Route path="/bars" element={isAuthenticated ? <BarList /> : <Navigate to="/login" />} />
-            <Route path="/bars/:id/events" element={isAuthenticated ? <Events /> : <Navigate to="/login" />} />
             <Route path="/search" element={isAuthenticated ? <UserSearch /> : <Navigate to="/login" />} />
-            <Route path="/login" element={<Login setIsAuthenticated={setIsAuthenticated} />} />
-            <Route path="/register" element={<Register setIsAuthenticated={setIsAuthenticated} />} />
             <Route path="/map" element={isAuthenticated ? <Map /> : <Navigate to="/login" />} />
             <Route path="/beers/:id" element={isAuthenticated ? <BeerDetail /> : <Navigate to="/login" />} />
             <Route path="/beers/:id/add-review" element={isAuthenticated ? <ReviewForm /> : <Navigate to="/login" />} />
             <Route path="/beers/:id/reviews" element={isAuthenticated ? <BeerReviews /> : <Navigate to="/login" />} />
             <Route path="/bars/:id" element={isAuthenticated ? <BarDetail /> : <Navigate to="/login" />} />
+            <Route path="/bars/:id/events" element={isAuthenticated ? <EventBar /> : <Navigate to="/login" />} />
+            <Route path="/login" element={<Login setIsAuthenticated={setIsAuthenticated} />} />
+            <Route path="/register" element={<Register setIsAuthenticated={setIsAuthenticated} />} />
             <Route path="/logout" element={<Navigate to="/" />} />
           </Routes>
         </div>
