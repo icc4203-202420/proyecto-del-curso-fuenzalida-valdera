@@ -1,51 +1,50 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import React, { useEffect, useState } from 'react'
+import { Typography, Card, CardContent, CircularProgress } from '@mui/material'
+import axios from 'axios'
+import { useParams } from 'react-router-dom'
 
 const BarDetail = () => {
-  const { id } = useParams();
-  const navigate = useNavigate();
-  const [bar, setBar] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const { id } = useParams()
+  const [bar, setBar] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
 
   useEffect(() => {
-    const fetchBar = async () => {
+    const fetchBarDetails = async () => {
       try {
-        const response = await fetch(`/api/bars/${id}`);
-        const data = await response.json();
-        setBar(data);
-      } catch (error) {
-        console.error('Error fetching bar:', error);
+        const response = await axios.get(`http://localhost:3001/api/v1/bars/${id}`)
+        setBar(response.data.bar)
+      } catch (err) {
+        console.error('Failed to load bar details:', err)
+        setError('Failed to load bar details')
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
-    };
-
-    fetchBar();
-  }, [id]);
-
-  const handleViewEventsClick = () => {
-    if (bar && bar.id) {
-      navigate(`/bars/${bar.id}/events`);
     }
-  };
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
+    fetchBarDetails()
+  }, [id])
 
-  if (!bar) {
-    return <div>Bar not found.</div>;
-  }
+  if (loading) return <CircularProgress />
+  if (error) return <Typography color="error">{error}</Typography>
 
   return (
-    <div className="bar-detail">
-      <h1>{bar.name}</h1>
-      <p>Address: {bar.address.line1}, {bar.address.line2}, {bar.address.city}</p>
-      <p>Location: {bar.latitude}, {bar.longitude}</p>
+    <Card>
+      <CardContent>
+        <Typography variant="h4">{bar.name}</Typography>
+        {bar.address ? (
+          <>
+            <Typography variant="h6">{bar.address.line1}, {bar.address.line2}</Typography>
+            <Typography variant="h6">{bar.address.city}</Typography>
+          </>
+        ) : (
+          <Typography>Address not available</Typography>
+        )}
+        <Typography variant="h6">Latitude: {bar.latitude}</Typography>
+        <Typography variant="h6">Longitude: {bar.longitude}</Typography>
+      </CardContent>
+    </Card>
+  )
+}
 
-      <button onClick={handleViewEventsClick}>View Events</button>
-    </div>
-  );
-};
-
-export default BarDetail;
+export default BarDetail

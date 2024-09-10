@@ -18,9 +18,9 @@ class API::V1::BarsController < ApplicationController
         thumbnail_url: url_for(@bar.thumbnail) }),
         status: :ok
     else
-      render json: { bar: @bar.as_json }, status: :ok
+      render json: { bar: @bar.as_json(include: { address: { include: :country } }) }, status: :ok
     end
-  end
+  end  
 
   def create
     @bar = Bar.new(bar_params.except(:image_base64))
