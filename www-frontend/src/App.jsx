@@ -18,6 +18,7 @@ import UserSearch from './components/UserSearch'
 import BeerDetail from './components/BeerDetail'
 import ReviewForm from './components/ReviewForm'
 import BeerReviews from './components/BeerReviews'
+import BarDetail from './components/BarDetail'
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -129,6 +130,7 @@ const App = () => {
             <Route path="/beers/:id" element={isAuthenticated ? <BeerDetail /> : <Navigate to="/login" />} />
             <Route path="/beers/:id/add-review" element={isAuthenticated ? <ReviewForm /> : <Navigate to="/login" />} />
             <Route path="/beers/:id/reviews" element={isAuthenticated ? <BeerReviews /> : <Navigate to="/login" />} />
+            <Route path="/bars/:id" element={isAuthenticated ? <BarDetail /> : <Navigate to="/login" />} />
             <Route path="/logout" element={<Navigate to="/" />} />
           </Routes>
         </div>

@@ -29,8 +29,17 @@ const Login = () => {
         const receivedToken = response.data.token
         sessionStorage.setItem('jwtToken', receivedToken)
         setServerError('')
-        navigate('/map')
+        setIsAuthenticated(true)
+        
+        // Verificar si el token se guarda correctamente
+        const storedToken = sessionStorage.getItem('jwtToken')
+        if (storedToken) {
+          navigate('/map')
+        } else {
+          console.error('Token not stored in sessionStorage')
+        }
       }
+      
     } catch (err) {
       if (err.response && err.response.status === 401) {
         setServerError('Incorrect password or email')
