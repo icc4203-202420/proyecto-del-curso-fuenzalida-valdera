@@ -32,15 +32,18 @@ const BarDetails = () => {
   if (loading) return <CircularProgress />
   if (error) return <Typography color="error">{error}</Typography>
 
+  if (!bar) {
+    return <Typography color="error">Bar not found</Typography>
+  }
+
+  const { name, address } = bar
+  const { line1 = '', line2 = '', city = '' } = address || {}
+
   return (
     <div>
-      {bar && (
-        <>
-          <Typography variant="h4">{bar.name}</Typography>
-          <Typography variant="h6">{bar.address.line1}, {bar.address.line2}</Typography>
-          <Typography variant="body1">{bar.address.city}</Typography>
-        </>
-      )}
+      <Typography variant="h4">{name}</Typography>
+      <Typography variant="h6">{line1} {line2}</Typography>
+      <Typography variant="body1">{city}</Typography>
       <Typography variant="h5" style={{ marginTop: '20px' }}>Events at this Bar</Typography>
       <Grid container spacing={3}>
         {events.length > 0 ? (
