@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
-import { Typography, Card, CardContent, CircularProgress } from '@mui/material'
+import { Typography, Card, CardContent, CircularProgress, Button } from '@mui/material'
 import axios from 'axios'
-import { useParams } from 'react-router-dom'
+import { useParams, Link } from 'react-router-dom'
 
 const BarDetail = () => {
   const { id } = useParams()
@@ -42,6 +42,18 @@ const BarDetail = () => {
         )}
         <Typography variant="h6">Latitude: {bar.latitude}</Typography>
         <Typography variant="h6">Longitude: {bar.longitude}</Typography>
+
+        {bar.events && bar.events.length > 0 && (
+          <Button
+            variant="contained"
+            color="primary"
+            style={{ marginTop: '20px' }}
+          >
+            <Link to={`/bars/${id}/events`} style={{ textDecoration: 'none', color: 'inherit' }}>
+              View Events
+            </Link>
+          </Button>
+        )}
       </CardContent>
     </Card>
   )

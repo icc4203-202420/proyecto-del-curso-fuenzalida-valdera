@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
-import { Typography, Card, CardContent, Grid, CircularProgress } from '@mui/material'
+import { useParams, useNavigate } from 'react-router-dom'
+import { Typography, Card, CardContent, Grid, CircularProgress, Button } from '@mui/material'
 import axios from 'axios'
 
 const EventBar = () => {
   const { id } = useParams()
+  const navigate = useNavigate()
   const [events, setEvents] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -15,7 +16,6 @@ const EventBar = () => {
         const eventsResponse = await axios.get(`http://localhost:3001/api/v1/bars/${id}/events`)
         setEvents(eventsResponse.data.events)
       } catch (err) {
-        console.error('Failed to load events:', err)
         setError('Failed to load events')
       } finally {
         setLoading(false)
@@ -30,6 +30,15 @@ const EventBar = () => {
 
   return (
     <div>
+      <Button 
+        variant="outlined" 
+        color="primary" 
+        onClick={() => navigate(-1)} 
+        style={{ margin: '20px 0' }}
+      >
+        Back to Bar Details
+      </Button>
+
       <Typography variant="h5" style={{ marginTop: '20px' }}>Events at this Bar</Typography>
       <Grid container spacing={3}>
         {events.length > 0 ? (
