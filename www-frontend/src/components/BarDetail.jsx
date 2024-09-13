@@ -35,7 +35,7 @@ const BarDetail = () => {
         {bar.address ? (
           <>
             <Typography variant="h6">{bar.address.line1}, {bar.address.line2}</Typography>
-            <Typography variant="h6">{bar.address.city}</Typography>
+            <Typography variant="h6">{bar.address.city}, {bar.address.country.name}</Typography>
           </>
         ) : (
           <Typography>Address not available</Typography>

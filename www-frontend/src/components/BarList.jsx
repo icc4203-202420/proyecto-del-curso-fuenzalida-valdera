@@ -61,8 +61,9 @@ const BarList = () => {
               <Card>
                 <CardContent>
                   <Typography variant="h6">{bar.name}</Typography>
-                  <Typography color="textSecondary">{bar.address.line1}, {bar.address.line2}</Typography>
-                  <Typography color="textSecondary">{bar.address.city}</Typography>
+                  <Typography color="textSecondary">
+                    {bar.address.line1}, {bar.address.line2}, {bar.address.city}, {bar.address.country.name}
+                  </Typography>
                 </CardContent>
                 <CardActions>
                   <Button size="small" variant="contained" style={{ marginTop: '8px' }}>
