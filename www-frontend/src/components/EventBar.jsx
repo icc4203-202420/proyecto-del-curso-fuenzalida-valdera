@@ -4,16 +4,17 @@ import { Typography, Card, CardContent, Grid, CircularProgress, Button, Avatar, 
 import axios from 'axios'
 
 const EventBar = () => {
-  const { id } = useParams()
+  const { id: barId } = useParams()
   const navigate = useNavigate()
   const [events, setEvents] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [userId, setUserId] = useState(null)
 
   useEffect(() => {
-    const fetchEvents = async () => {
+       const fetchEvents = async () => {
       try {
-        const eventsResponse = await axios.get(`http://localhost:3001/api/v1/bars/${id}/events`)
+        const eventsResponse = await axios.get(`http://localhost:3001/api/v1/bars/${barId}/events`)
         setEvents(eventsResponse.data.events || [])
       } catch (err) {
         setError('Failed to load events')
@@ -23,7 +24,17 @@ const EventBar = () => {
     }
   
     fetchEvents()
-  }, [id])  
+  }, [barId])  
+
+  const handleCheckIn = async (eventId) => {
+    try {
+      await axios.post(`http://localhost:3001/api/v1/bars/${barId}/events/${eventId}/check_in`, { user_id: userId })
+      const eventsResponse = await axios.get(`http://localhost:3001/api/v1/bars/${barId}/events`)
+      setEvents(eventsResponse.data.events || [])
+    } catch (err) {
+      setError('Failed to check in')
+    }
+  }
 
   if (loading) return <CircularProgress />
   if (error) return <Typography color="error">{error}</Typography>
@@ -70,6 +81,19 @@ const EventBar = () => {
                       <Typography>No attendees for this event</Typography>
                     )}
                   </div>
+
+                  {event.user_has_checked_in ? (
+                    <Button variant="outlined" disabled style={{ marginTop: '10px' }}>You're in!</Button>
+                  ) : (
+                    <Button 
+                      variant="contained" 
+                      color="primary" 
+                      onClick={() => handleCheckIn(event.id)} 
+                      style={{ marginTop: '10px' }}
+                    >
+                      Check In
+                    </Button>
+                  )}
                 </CardContent>
               </Card>
             </Grid>
