@@ -8,26 +8,39 @@ class API::V1::EventsController < ApplicationController
   before_action :authenticate_user!, only: [:create, :update, :destroy]
 
   def index
-    if params[:bar_id]
-      @events = Event.where(bar_id: params[:bar_id])
-      render json: { events: @events }, status: :ok
-    else
-      @events = Event.all
-      render json: { events: @events }, status: :ok
+    events = Event.includes(:users).where(bar_id: params[:bar_id])
+
+    events_data = events.map do |event|
+      {
+        id: event.id,
+        name: event.name,
+        description: event.description,
+        date: event.date,
+        attendees: event.users.map { |user| { id: user.id, first_name: user.first_name, last_name: user.last_name } }
+      }
     end
-  end
+
+    render json: { events: events_data }
+  end 
 
   def show
-    event = Event.find(params[:id])
-    user = User.find(params[:user_id])
-    friends = user.friends.pluck(:id)
+    bar = Bar.find(params[:id])
+    events = bar.events
   
-    attendees = event.attendances.includes(:user)
-                      .order(Arel.sql("CASE WHEN users.id IN (#{friends.join(',')}) THEN 0 ELSE 1 END"))
-                      .map(&:user)
+    events_with_attendees = events.map do |event|
+      attendees = Attendance.where(event_id: event.id).includes(:user).map do |attendance|
+        {
+          id: attendance.user.id,
+          name: attendance.user.name,
+          avatar_url: attendance.user.avatar_url
+        }
+      end
   
-    render json: { event: event, attendees: attendees }
-  end
+      event.as_json.merge(attendees: attendees)
+    end
+  
+    render json: { events: events_with_attendees }
+  end  
 
   def create
     @event = Event.new(event_params.except(:image_base64))
