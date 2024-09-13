@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { Typography, Card, CardContent, Grid, CircularProgress, Button, Avatar } from '@mui/material'
+import { Typography, Card, CardContent, Grid, CircularProgress, Button, Avatar, Tooltip } from '@mui/material'
 import axios from 'axios'
 
 const EventBar = () => {
@@ -59,7 +59,12 @@ const EventBar = () => {
                   <div style={{ display: 'flex', overflowX: 'scroll', padding: '10px 0' }}>
                     {event.attendees && event.attendees.length > 0 ? (
                       event.attendees.map(attendee => (
-                        <Avatar key={attendee.id} alt={attendee.name} src={attendee.avatar_url} style={{ marginRight: '10px' }} />
+                        <div key={attendee.id} style={{ marginRight: '10px', textAlign: 'center' }}>
+                          <Tooltip title={attendee.handle}>
+                            <Avatar alt={attendee.name} src={attendee.avatar_url} />
+                          </Tooltip>
+                          <Typography variant="caption" style={{ marginTop: '5px' }}>{attendee.handle}</Typography>
+                        </div>
                       ))
                     ) : (
                       <Typography>No attendees for this event</Typography>

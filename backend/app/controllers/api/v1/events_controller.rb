@@ -8,20 +8,26 @@ class API::V1::EventsController < ApplicationController
   before_action :authenticate_user!, only: [:create, :update, :destroy]
 
   def index
-    events = Event.includes(:users).where(bar_id: params[:bar_id])
+    @events = Event.where(bar_id: params[:bar_id])
 
-    events_data = events.map do |event|
-      {
-        id: event.id,
-        name: event.name,
-        description: event.description,
-        date: event.date,
-        attendees: event.users.map { |user| { id: user.id, first_name: user.first_name, last_name: user.last_name } }
-      }
-    end
-
-    render json: { events: events_data }
-  end 
+    render json: {
+      events: @events.map do |event|
+        {
+          id: event.id,
+          name: event.name,
+          description: event.description,
+          date: event.date,
+          attendees: event.users.map do |user|
+            {
+              id: user.id,
+              name: "#{user.first_name} #{user.last_name}",
+              handle: user.handle
+            }
+          end
+        }
+      end
+    }
+  end
 
   def show
     bar = Bar.find(params[:id])
