@@ -48,7 +48,10 @@ const EventBar = () => {
                 <CardContent>
                   <Typography variant="h6">{event.name}</Typography>
                   <Typography color="textSecondary">{event.description}</Typography>
-                  <Typography color="textSecondary">{new Date(event.date).toLocaleDateString()}</Typography>
+                  <Typography color="textSecondary">
+                    {new Date(event.date).toLocaleDateString()}{' '}
+                    {new Date(event.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </Typography>
                 </CardContent>
               </Card>
             </Grid>
