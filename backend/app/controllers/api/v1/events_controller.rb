@@ -18,14 +18,15 @@ class API::V1::EventsController < ApplicationController
   end
 
   def show
-    if @event.image.attached?
-      render json: @event.as_json.merge({
-        image_url: url_for(@event.image),
-        thumbnail_url: url_for(@event.thumbnail)}),
-        status: :ok
-    else
-      render json: { event: @event.as_json }, status: :ok
-    end
+    event = Event.find(params[:id])
+    user = User.find(params[:user_id])
+    friends = user.friends.pluck(:id)
+  
+    attendees = event.attendances.includes(:user)
+                      .order(Arel.sql("CASE WHEN users.id IN (#{friends.join(',')}) THEN 0 ELSE 1 END"))
+                      .map(&:user)
+  
+    render json: { event: event, attendees: attendees }
   end
 
   def create
