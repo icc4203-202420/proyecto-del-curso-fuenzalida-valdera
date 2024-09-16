@@ -61,5 +61,51 @@ if Rails.env.development?
     end
   end
 
+  # db/seeds.rb
+
+# db/seeds.rb
+
+# db/seeds.rb
+
+# Agregar Chile a la base de datos si no existe
+chile = Country.find_or_create_by!(name: 'Chile')
+
+# Crea una dirección para el bar Pork Bar
+address_pork = Address.create!(
+  line1: 'Francisco Bulnes Correa 1156',
+  line2: '7610588 Las Condes',
+  city: 'Santiago',
+  country_id: chile.id,  # Usa el ID del país Chile
+  user_id: 1  # Ajusta el user_id según corresponda
+)
+
+# Crea el bar Pork Bar
+Bar.create!(
+  name: 'Pork Bar',
+  latitude: -33.391361,
+  longitude: -70.515246,
+  address_id: address_pork.id
+)
+
+# Crea una dirección para el bar Checho's Bar
+address_checho = Address.create!(
+  line1: 'Av. Pdte. Kennedy Lateral 8585',
+  line2: '7560009 Las Condes',
+  city: 'Santiago',
+  country_id: chile.id,  # Usa el ID del país Chile
+  user_id: 1  # Ajusta el user_id según corresponda
+)
+
+# Crea el bar Checho's Bar
+Bar.create!(
+  name: "Checho's Bar",
+  latitude: -33.390848,
+  longitude: -70.549667,
+  address_id: address_checho.id
+)
+
+
+
+
 
 end
