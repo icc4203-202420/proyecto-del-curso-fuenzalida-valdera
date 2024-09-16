@@ -21,22 +21,22 @@ Rails.application.routes.draw do
 
   namespace :api, defaults: { format: :json } do
     namespace :v1 do
-      resources :bars
-      resources :beers
-<<<<<<< HEAD
-      resources :events, only: [:show, :create, :update, :destroy]
+      resources :bars do
+        resources :events, only: [:index, :show, :create, :update, :destroy] do
+          post 'check_in', on: :member
+        end
+      end
+      resources :beers do
+        resources :reviews, only: [:index, :create]
+      end
       resources :users do
         resources :reviews, only: [:index]
         member do
           get 'friendships', to: 'users#friendships'
           post 'friendships', to: 'users#create_friendship'
         end
-=======
-      resources :users do
-        resources :reviews, only: [:index]
->>>>>>> upstream/main
       end
-      
+
       resources :reviews, only: [:index, :show, :create, :update, :destroy]
     end
   end

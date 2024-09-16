@@ -1,8 +1,5 @@
-<<<<<<< HEAD
-=======
 require 'factory_bot_rails'
 
->>>>>>> upstream/main
 # This file should ensure the existence of records required to run the application in every environment (production,
 # development, test). The code here should be idempotent so that it can be executed at any point in every environment.
 # The data can then be loaded with the bin/rails db:seed command (or created alongside the database with db:setup).
@@ -16,14 +13,12 @@ require 'factory_bot_rails'
 # Initialize the review counter
 ReviewCounter.create(count: 0)
 
-<<<<<<< HEAD
 # Populate the DB with fake data
 # Rake::Task['db:populate_fake_data'].invoke
-=======
 if Rails.env.development?
 
   # Crear países
-  countries = FactoryBot.create_list(:country, 5)
+  countries = FactoryBot.create_list(:country, 20)
 
   # Crear cervecerías (breweries) con marcas (brands) y cervezas (beers)
   countries.map do |country|
@@ -31,12 +26,12 @@ if Rails.env.development?
   end
 
   # Crear usuarios con direcciones asociadas
-  users = FactoryBot.create_list(:user, 10) do |user, i|
+  users = FactoryBot.create_list(:user, 50) do |user, i|
     user.address.update(country: countries.sample)
   end
 
   # Crear bares con direcciones y cervezas asociadas
-  bars = FactoryBot.create_list(:bar, 5) do |bar|
+  bars = FactoryBot.create_list(:bar, 50) do |bar|
     bar.address.update(country: countries.sample)
     bar.beers << Beer.all.sample(rand(1..3))
   end
@@ -58,5 +53,59 @@ if Rails.env.development?
     end
   end
 
+  # Crear reviews de cervezas
+  users.each do |user|
+    beers = Beer.all.sample(rand(1..3))
+    beers.each do |beer|
+      FactoryBot.create(:review, user: user, beer: beer)
+    end
+  end
+
+  # db/seeds.rb
+
+# db/seeds.rb
+
+# db/seeds.rb
+
+# Agregar Chile a la base de datos si no existe
+chile = Country.find_or_create_by!(name: 'Chile')
+
+# Crea una dirección para el bar Pork Bar
+address_pork = Address.create!(
+  line1: 'Francisco Bulnes Correa 1156',
+  line2: '7610588 Las Condes',
+  city: 'Santiago',
+  country_id: chile.id,  # Usa el ID del país Chile
+  user_id: 1  # Ajusta el user_id según corresponda
+)
+
+# Crea el bar Pork Bar
+Bar.create!(
+  name: 'Pork Bar',
+  latitude: -33.391361,
+  longitude: -70.515246,
+  address_id: address_pork.id
+)
+
+# Crea una dirección para el bar Checho's Bar
+address_checho = Address.create!(
+  line1: 'Av. Pdte. Kennedy Lateral 8585',
+  line2: '7560009 Las Condes',
+  city: 'Santiago',
+  country_id: chile.id,  # Usa el ID del país Chile
+  user_id: 1  # Ajusta el user_id según corresponda
+)
+
+# Crea el bar Checho's Bar
+Bar.create!(
+  name: "Checho's Bar",
+  latitude: -33.390848,
+  longitude: -70.549667,
+  address_id: address_checho.id
+)
+
+
+
+
+
 end
->>>>>>> upstream/main
