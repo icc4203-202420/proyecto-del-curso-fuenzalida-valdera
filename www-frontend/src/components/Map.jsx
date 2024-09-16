@@ -12,8 +12,10 @@ const Map = () => {
   const [error, setError] = useState(null);
   const [userLocation, setUserLocation] = useState(null); // State for user location
   const [searchTerm, setSearchTerm] = useState(''); // State for search input
+  const [searchResultPosition, setSearchResultPosition] = useState(null); // Position of the closest bar
   const mapRef = useRef(null);
   const markerClusterRef = useRef(null);
+  const markersRef = useRef([]); // Ref to store markers
   const infoWindowRef = useRef(null);
   const navigate = useNavigate(); // Hook for navigation
 
@@ -74,6 +76,7 @@ const Map = () => {
 
     // Add marker to the marker clusterer
     markerClusterer.addMarker(marker);
+    markersRef.current.push(marker); // Store marker reference
   };
 
   // Initialize map and markers
@@ -89,6 +92,7 @@ const Map = () => {
     initializeMap();
   }, []);
 
+  // Load Google Maps and create markers
   useEffect(() => {
     if (!mapRef.current) return;
 
@@ -115,21 +119,37 @@ const Map = () => {
         loader.importLibrary('marker').then((lib) => {
           const { AdvancedMarkerElement, PinElement } = lib;
 
+          // Clear existing markers
+          markersRef.current.forEach(marker => marker.setMap(null));
+          markersRef.current = [];
+
           filteredBars.forEach(({ name, latitude, longitude, id }) => {
             const position = { lat: latitude, lng: longitude };
             addMarker(position, name, id, map, markerClusterer);
           });
+
+          // Center the map on the closest bar if there are filtered results and searchResultPosition is set
+          if (searchResultPosition) {
+            map.setCenter(searchResultPosition);
+          }
         });
       })
       .catch((error) => {
         console.error('Error loading Google Maps library:', error);
       });
-  }, [filteredBars, userLocation]);
+  }, [filteredBars, userLocation, searchResultPosition]);
 
   // Filter bars based on search term
   const handleSearch = () => {
     const filtered = bars.filter(bar => bar.name.toLowerCase().includes(searchTerm.toLowerCase()));
     setFilteredBars(filtered);
+
+    // Find the closest bar (assuming the first one is the closest)
+    if (filtered.length > 0) {
+      const closestBar = filtered[0];
+      const closestPosition = { lat: closestBar.latitude, lng: closestBar.longitude };
+      setSearchResultPosition(closestPosition);
+    }
   };
 
   // Get user location and center map
@@ -140,7 +160,6 @@ const Map = () => {
           const userPos = { lat: position.coords.latitude, lng: position.coords.longitude };
           setUserLocation(userPos);
 
-          // Re-center the map based on the user location
           if (mapRef.current) {
             const map = new google.maps.Map(mapRef.current, {
               center: userPos,
