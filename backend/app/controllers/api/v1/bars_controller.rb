@@ -15,9 +15,9 @@ class API::V1::BarsController < ApplicationController
     if @bar.image.attached?
       render json: @bar.as_json(include: {
         address: {
-          only: [:line1, :line2, :city], 
+          only: [:line1, :line2, :city],
           include: {
-            country: { only: [:name] } 
+            country: { only: [:name] }
           }
         },
         events: { only: [:id, :name, :description, :date] }
@@ -28,7 +28,7 @@ class API::V1::BarsController < ApplicationController
     else
       render json: { bar: @bar.as_json(include: {
         address: {
-          only: [:line1, :line2, :city], 
+          only: [:line1, :line2, :city],
           include: {
             country: { only: [:name] }
           }
@@ -36,7 +36,7 @@ class API::V1::BarsController < ApplicationController
         events: { only: [:id, :name, :description, :date] }
       }) }, status: :ok
     end
-  end  
+  end
 
   def create
     @bar = Bar.new(bar_params.except(:image_base64))
