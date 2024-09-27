@@ -1,110 +1,75 @@
 import React, { useState } from 'react'
-import { Formik, Form, Field, ErrorMessage } from 'formik'
-import * as Yup from 'yup'
-import axios from 'axios'
-import { TextField, Button, Typography, Container, Paper } from '@mui/material'
 import { useNavigate } from 'react-router-dom'
 
-const validationSchema = Yup.object({
-  email: Yup.string().email('Invalid email').required('Email is required'),
-  password: Yup.string().required('Password is required').min(6, 'Password must be at least 6 characters'),
-})
-
-const initialValues = {
-  email: '',
-  password: '',
-}
-
-const Login = () => {
-  const [serverError, setServerError] = useState('')
+const Login = ({ setIsAuthenticated }) => {
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState(null)
   const navigate = useNavigate()
 
-  const handleSubmit = async (values, { setSubmitting }) => {
+  const handleLoginSuccess = (data) => {
+    const token = data.status.data.token
+    sessionStorage.setItem('jwtToken', token)
+    setIsAuthenticated(true)
+    navigate('/map')
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setError(null)
+
     try {
-      const response = await axios.post('http://localhost:3001/api/v1/login', {
-        user: values
+      const response = await fetch('http://localhost:3001/api/v1/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          user: {
+            email: email,
+            password: password
+          }
+        })
       })
-      
-      if (response.status === 200) {
-        const receivedToken = response.data.token
-        sessionStorage.setItem('jwtToken', receivedToken)
-        setServerError('')
-        navigate('/map')
-        window.location.reload()
-      }
-      
-    } catch (err) {
-      if (err.response && err.response.status === 401) {
-        setServerError('Incorrect password or email')
+
+      if (response.ok) {
+        const data = await response.json()
+        handleLoginSuccess(data)
       } else {
-        setServerError('Server error. Please try again later or refresh the page.')
+        const errorData = await response.json()
+        setError(errorData.message || 'Login failed')
       }
-      console.error('Form submit error:', err)
-    } finally {
-      setSubmitting(false)
+    } catch (error) {
+      setError('An error occurred. Please try again.')
     }
-  }  
+  }
 
   return (
-    <Container component={Paper} maxWidth="xs" style={{ padding: '2rem', marginTop: '2rem', backgroundColor: '#fff' }}>
-      <Typography variant="h5" align="center" gutterBottom>Login</Typography>
-      <Formik
-        initialValues={initialValues}
-        validationSchema={validationSchema}
-        onSubmit={handleSubmit}
-      >
-        {({ isSubmitting }) => (
-          <Form>
-            <Field
-              name="email"
-              as={TextField}
-              label="Email"
-              type="email"
-              fullWidth
-              margin="normal"
-              variant="outlined"
-              helperText={<ErrorMessage name="email" />}
-              error={Boolean(<ErrorMessage name="email" />)}
-            />
-            <Field
-              name="password"
-              as={TextField}
-              label="Password"
-              type="password"
-              fullWidth
-              margin="normal"
-              variant="outlined"
-              helperText={<ErrorMessage name="password" />}
-              error={Boolean(<ErrorMessage name="password" />)}
-            />
-            <Button
-              type="submit"
-              variant="contained"
-              color="primary"
-              fullWidth
-              disabled={isSubmitting}
-              style={{ marginTop: '1rem' }}
-            >
-              {isSubmitting ? 'Loading...' : 'Login'}
-            </Button>
-            {serverError && (
-              <Typography color="error" align="center" style={{ marginTop: '1rem' }}>
-                {serverError}
-              </Typography>
-            )}
-            <Button
-              variant="contained"
-              color="primary"
-              fullWidth
-              style={{ marginTop: '1rem' }}
-              onClick={() => navigate('/register')}
-            >
-              Register
-            </Button>
-          </Form>
-        )}
-      </Formik>
-    </Container>
+    <div>
+      <h2>Login</h2>
+      {error && <p style={{ color: 'red' }}>{error}</p>}
+      <form onSubmit={handleSubmit}>
+        <div>
+          <label>Email:</label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label>Password:</label>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+        </div>
+        <button type="submit">Login</button>
+      </form>
+    </div>
   )
 }
 
