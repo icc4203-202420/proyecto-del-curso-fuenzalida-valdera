@@ -1,10 +1,15 @@
 class API::V1::UsersController < ApplicationController
   respond_to :json
   before_action :set_user, only: [:show, :update] 
-  before_action :authenticate_user!, only: [:create, :update, :destroy, :friendships, :create_friendship]
+  before_action :authenticate_user!, only: [:create, :update, :friendships, :create_friendship]
   
   def index
-    @users = User.includes(:reviews, :address).all   
+    if params[:handle]
+      @users = User.where("LOWER(handle) LIKE ?", "%#{params[:handle].downcase}%")
+      render json: @users
+    else
+      render json: { error: 'Handle not provided' }, status: :bad_request
+    end
   end
 
   def show ; end
@@ -34,19 +39,12 @@ class API::V1::UsersController < ApplicationController
   end
 
   def create_friendship
-    friend = User.find_by(id: params[:friend_id])
+    friend = User.find(params[:friend_id])
+    current_user.friendships.create(friend: friend, bar_id: params[:bar_id])
 
-    if friend.nil?
-      render json: { error: "Couldn't find friend"}, status: :not_found
-      return
-    end
-
-    @friendship = @user.friendships.build(friend: friend, bar_id: params[:bar_id])
-    if @friendship.save
-      render json: @friendship, status: :created
-    else
-      render json: @friendship.errors, status: :unprocessable_entity
-    end
+    render json: { message: 'Amigo agregado exitosamente' }, status: :created
+  rescue ActiveRecord::RecordNotFound
+    render json: { error: 'Usuario no encontrado' }, status: :not_found
   end
 
   private
