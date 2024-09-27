@@ -45,32 +45,85 @@ const Login = ({ setIsAuthenticated }) => {
   }
 
   return (
-    <div>
-      <h2>Login</h2>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Email:</label>
+    <div style={styles.container}>
+      <h2 style={styles.title}>Login</h2>
+      {error && <p style={styles.error}>{error}</p>}
+      <form onSubmit={handleSubmit} style={styles.form}>
+        <div style={styles.inputGroup}>
+          <label style={styles.label}>Email:</label>
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
+            style={styles.input}
           />
         </div>
-        <div>
-          <label>Password:</label>
+        <div style={styles.inputGroup}>
+          <label style={styles.label}>Password:</label>
           <input
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            style={styles.input}
           />
         </div>
-        <button type="submit">Login</button>
+        <button type="submit" style={styles.button}>Login</button>
       </form>
     </div>
   )
+}
+
+const styles = {
+  container: {
+    maxWidth: '400px',
+    margin: '0 auto',
+    padding: '20px',
+    border: '1px solid #ccc',
+    borderRadius: '8px',
+    boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
+    backgroundColor: '#343a40', 
+    color: '#ffffff',
+  },
+  title: {
+    textAlign: 'center',
+    marginBottom: '20px',
+  },
+  error: {
+    color: 'red',
+    textAlign: 'center',
+  },
+  form: {
+    display: 'flex',
+    flexDirection: 'column',
+  },
+  inputGroup: {
+    marginBottom: '15px',
+  },
+  label: {
+    marginBottom: '5px',
+    fontWeight: 'bold',
+    color: '#ffffff',
+  },
+  input: {
+    padding: '10px',
+    border: '1px solid #ccc',
+    borderRadius: '4px',
+    width: '100%',
+    boxSizing: 'border-box',
+    backgroundColor: '#495057',
+    color: '#ffffff',
+  },
+  button: {
+    padding: '10px',
+    border: 'none',
+    borderRadius: '4px',
+    backgroundColor: '#007bff',
+    color: '#fff',
+    cursor: 'pointer',
+    transition: 'background-color 0.3s',
+  },
 }
 
 export default Login
