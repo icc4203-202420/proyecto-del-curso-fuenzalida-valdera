@@ -9,10 +9,12 @@ const EventBar = () => {
   const [events, setEvents] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [userId, setUserId] = useState(null)
+  const [userId, setUserId] = useState(null) // Asegúrate de establecer este valor correctamente
+  const [selectedFile, setSelectedFile] = useState(null)
+  const [selectedEventId, setSelectedEventId] = useState(null)
 
   useEffect(() => {
-       const fetchEvents = async () => {
+    const fetchEvents = async () => {
       try {
         const eventsResponse = await axios.get(`http://localhost:3001/api/v1/bars/${barId}/events`)
         setEvents(eventsResponse.data.events || [])
@@ -27,12 +29,43 @@ const EventBar = () => {
   }, [barId])  
 
   const handleCheckIn = async (eventId) => {
+    if (!userId) {
+      setError('User not logged in')
+      return
+    }
+    
     try {
       await axios.post(`http://localhost:3001/api/v1/bars/${barId}/events/${eventId}/check_in`, { user_id: userId })
       const eventsResponse = await axios.get(`http://localhost:3001/api/v1/bars/${barId}/events`)
       setEvents(eventsResponse.data.events || [])
     } catch (err) {
       setError('Failed to check in')
+    }
+  }
+
+  const handleFileChange = (event) => {
+    setSelectedFile(event.target.files[0])
+  }
+
+  const handleUploadImage = async (eventId) => {
+    if (!selectedFile) return
+
+    const formData = new FormData()
+    formData.append('event_picture[image]', selectedFile)
+    formData.append('event_picture[description]', 'Image for event')
+
+    try {
+      await axios.post(`http://localhost:3001/api/v1/bars/${barId}/events/${eventId}/event_pictures`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      })
+      const eventsResponse = await axios.get(`http://localhost:3001/api/v1/bars/${barId}/events`)
+      setEvents(eventsResponse.data.events || [])
+      setSelectedFile(null) // Clear selected file
+      setSelectedEventId(null) // Clear selected event id
+    } catch (err) {
+      setError('Failed to upload image')
     }
   }
 
@@ -94,6 +127,22 @@ const EventBar = () => {
                       Check In
                     </Button>
                   )}
+
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    onChange={handleFileChange} 
+                    style={{ marginTop: '10px' }}
+                  />
+                  <Button 
+                    variant="contained" 
+                    color="secondary" 
+                    onClick={() => handleUploadImage(event.id)} 
+                    disabled={!selectedFile} 
+                    style={{ marginTop: '10px' }}
+                  >
+                    Upload Image
+                  </Button>
                 </CardContent>
               </Card>
             </Grid>

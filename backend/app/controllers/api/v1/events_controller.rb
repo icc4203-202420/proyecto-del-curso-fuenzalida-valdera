@@ -30,23 +30,27 @@ class API::V1::EventsController < ApplicationController
   end
 
   def show
-    bar = Bar.find(params[:id])
-    events = bar.events
-  
-    events_with_attendees = events.map do |event|
-      attendees = Attendance.where(event_id: event.id).includes(:user).map do |attendance|
-        {
-          id: attendance.user.id,
-          name: attendance.user.name,
-          avatar_url: attendance.user.avatar_url
-        }
-      end
-  
-      event.as_json.merge(attendees: attendees)
+    address = Address.find_by(id: Bar.find_by(id: @event.bar_id).address_id)
+    @event_pictures = @event.event_pictures # Get all event pictures associated with the event
+    Rails.logger.info "Addresses are: #{address}"
+
+    event_pictures_data = @event_pictures.map do |picture|
+      { id: picture.id, description: picture.description, image_url: url_for(picture.image) }
     end
-  
-    render json: { events: events_with_attendees }
-  end  
+
+    if @event.flyer.attached?
+      render json: @event.as_json.merge({
+        image_url: url_for(@event.image),
+        thumbnail_url: url_for(@event.thumbnail)
+      }), status: :ok
+    else
+      render json: {
+        event: @event.as_json,
+        address: address,
+        event_pictures: event_pictures_data
+      }, status: :ok
+    end
+  end
 
   def create
     @event = Event.new(event_params.except(:image_base64))
@@ -76,19 +80,19 @@ class API::V1::EventsController < ApplicationController
 
   def check_in
     event = Event.find_by(id: params[:id])
-    
+
     if event.nil?
       render json: { success: false, message: 'Event not found' }, status: :not_found
       return
     end
-  
+
     if current_user.nil?
       render json: { success: false, message: 'User not authenticated' }, status: :unauthorized
       return
     end
-  
+
     attendance = Attendance.find_or_initialize_by(user_id: current_user.id, event_id: event.id)
-  
+
     if attendance.checked_in
       render json: { success: false, message: 'Already checked in' }, status: :unprocessable_entity
     else
@@ -98,7 +102,7 @@ class API::V1::EventsController < ApplicationController
         render json: { success: false, message: 'Failed to check in' }, status: :unprocessable_entity
       end
     end
-  end  
+  end
 
   private
 
