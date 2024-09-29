@@ -34,6 +34,13 @@ const ReviewForm = () => {
       return
     }
 
+    // Validar que el texto tenga al menos 15 palabras
+    const wordCount = text.trim().split(/\s+/).length
+    if (wordCount < 15) {
+      setError('Review text must be at least 15 words.')
+      return
+    }
+
     // Cambiar la estructura de datos para el POST
     const data = {
       review: {
