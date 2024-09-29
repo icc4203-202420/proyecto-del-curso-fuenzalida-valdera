@@ -22,7 +22,7 @@ class API::V1::ReviewsController < ApplicationController
 
     # Renderiza las reseñas incluyendo el handle del usuario
     render json: {
-      reviews: reviews.map { |review| 
+      reviews: reviews.map { |review|
         {
           id: review.id,
           text: review.text,
@@ -42,18 +42,24 @@ class API::V1::ReviewsController < ApplicationController
   end
 
   def create
-    current_user = get_current_user_from_token
     beer = Beer.find(params[:beer_id])
-    review = beer.reviews.build(review_params)
+    current_user = User.find(params[:user_id]) # Obtén el usuario directamente desde el ID enviado
   
+    unless current_user
+      render json: { errors: ["User not found"] }, status: :not_found
+      return
+    end
+  
+    review = Review.new(review_params)
     review.user = current_user
+    review.beer = beer
   
     if review.save
       render json: review, status: :created
     else
-      render json: { errors: review.errors.full_messages }, status: :unprocessable_entity # Muestra los errores
+      render json: { errors: review.errors.full_messages }, status: :unprocessable_entity
     end
-  end  
+  end
 
   def update
     if @review.update(review_params)
@@ -76,18 +82,6 @@ class API::V1::ReviewsController < ApplicationController
   end
 
   def review_params
-    params.require(:review).permit(:rating, :text) # Permite estos parámetros
-  end
-
-  def get_current_user_from_token
-    token = request.headers['Authorization']&.split(' ')&.last # Obtiene el token del encabezado
-    return unless token
-
-    begin
-      decoded_token = JWT.decode(token, Rails.application.credentials.secret_key_base)[0]
-      User.find(decoded_token['user_id']) # Encuentra el usuario por ID en el token
-    rescue JWT::DecodeError
-      nil # En caso de error al decodificar, devuelve nil
-    end
+    params.require(:review).permit(:rating, :text, :user_id)
   end
 end

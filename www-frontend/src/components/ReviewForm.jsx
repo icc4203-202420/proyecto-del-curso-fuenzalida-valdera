@@ -29,31 +29,39 @@ const ReviewForm = () => {
     const token = sessionStorage.getItem('jwtToken');
   
     // Validar el rating
-    if (rating < 1 || rating > 5) {
-      setError('Rating must be between 1 and 5.');
+    if (!rating || rating < 1 || rating > 5) {
+      setError('Rating must be a number between 1 and 5.');
       return;
     }
   
     // Cambiar la estructura de datos para el POST
     const data = {
-      review: { // Asegúrate de que 'review' es el objeto que se envía
+      review: {
         rating: Number(rating),
         text,
       },
+      user_id: currentUserId, // Incluyendo el user_id directamente
     };
   
     try {
       setIsSubmitting(true);
-      await axios.post(`http://localhost:3001/api/v1/beers/${beerId}/reviews`, data, {
-        headers: { Authorization: `Bearer ${token}` },
+      const response = await axios.post(`http://localhost:3001/api/v1/beers/${beerId}/reviews`, data, {
+        headers: { Authorization: `Bearer ${token}` }, // Mantén el token para otras autenticaciones
       });
-      alert('Review added successfully!');
-      setRating('');
-      setText('');
-      setError(null);
+  
+      if (response.status === 201) {
+        alert('Review added successfully!');
+        setRating('');
+        setText('');
+        setError(null);
+      }
     } catch (error) {
       console.error('Error adding review:', error);
-      setError('Failed to add review. Please try again.');
+      if (error.response && error.response.data && error.response.data.errors) {
+        setError(error.response.data.errors.join(', '));
+      } else {
+        setError('Failed to add review. Please try again.');
+      }
     } finally {
       setIsSubmitting(false);
     }
