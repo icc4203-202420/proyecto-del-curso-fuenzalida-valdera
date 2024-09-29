@@ -4,10 +4,23 @@ class API::V1::ReviewsController < ApplicationController
 
   # GET /api/v1/beers/:beer_id/reviews
   def index
-    @reviews = Review.where(beer_id: params[:beer_id])
-                      .page(params[:page])
-                      .per(params[:per_page])
-    render json: @reviews, each_serializer: ReviewSerializer, status: :ok
+    beer = Beer.find(params[:beer_id])
+
+    # Configura los parámetros de paginación
+    page = (params[:page] || 1).to_i
+    per_page = (params[:per_page] || 5).to_i
+
+    # Calcular el offset
+    offset = (page - 1) * per_page
+
+    # Obtener las reseñas con limit y offset
+    reviews = beer.reviews.limit(per_page).offset(offset)
+
+    # Contar el total de reseñas para calcular total_pages
+    total_reviews = beer.reviews.count
+    total_pages = (total_reviews.to_f / per_page).ceil
+
+    render json: { reviews: reviews, total_pages: total_pages }
   end
 
   def show

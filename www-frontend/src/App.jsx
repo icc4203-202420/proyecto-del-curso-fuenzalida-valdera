@@ -95,10 +95,6 @@ const App = () => {
               <ListItemIcon><LocalBarIcon style={{ color: 'black' }} /></ListItemIcon>
               <ListItemText primary="Bars" />
             </ListItem>
-            <ListItem button component={Link} to="/events" onClick={toggleDrawer(false)} style={{color: 'black'}}>
-              <ListItemIcon><EventIcon style={{ color: 'black' }} /></ListItemIcon>
-              <ListItemText primary="Events" />
-            </ListItem>
             <ListItem button component={Link} to="/search" onClick={toggleDrawer(false)} style={{color: 'black'}}>
               <ListItemIcon><SearchIcon style={{ color: 'black' }} /></ListItemIcon>
               <ListItemText primary="Search Users" />
