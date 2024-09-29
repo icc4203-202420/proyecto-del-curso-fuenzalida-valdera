@@ -1,91 +1,92 @@
-import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Typography, Card, CardContent, Grid, CircularProgress, Button, Avatar, Tooltip } from '@mui/material';
-import axios from 'axios';
+import React, { useEffect, useState } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
+import { Typography, Card, CardContent, Grid, CircularProgress, Button, Avatar, Tooltip, Autocomplete, TextField } from '@mui/material'
+import axios from 'axios'
 
 const EventBar = () => {
-  const { id: barId } = useParams();
-  const navigate = useNavigate();
-  const [events, setEvents] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [userId, setUserId] = useState(null);
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [imageDescription, setImageDescription] = useState(''); // Estado para la descripción de la imagen
+  const { id: barId } = useParams()
+  const navigate = useNavigate()
+  const [events, setEvents] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [userId, setUserId] = useState(null)
+  const [selectedFile, setSelectedFile] = useState(null)
+  const [imageDescription, setImageDescription] = useState('')
+  const [loadingUsers, setLoadingUsers] = useState(false)
 
   useEffect(() => {
     const fetchUserId = () => {
-      const storedUserId = sessionStorage.getItem('userId');
+      const storedUserId = sessionStorage.getItem('userId')
       if (storedUserId) {
-        setUserId(Number(storedUserId));
+        setUserId(Number(storedUserId))
       } else {
-        setError('User ID not found in session storage');
+        setError('User ID not found in session storage')
       }
-    };
+    }
 
-    fetchUserId();
+    fetchUserId()
 
     const fetchEvents = async () => {
       try {
-        const eventsResponse = await axios.get(`http://localhost:3001/api/v1/bars/${barId}/events`);
-        setEvents(eventsResponse.data.events || []);
+        const eventsResponse = await axios.get(`http://localhost:3001/api/v1/bars/${barId}/events`)
+        setEvents(eventsResponse.data.events || [])
       } catch (err) {
-        setError('Failed to load events');
+        setError('Failed to load events')
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
-    };
+    }
 
-    fetchEvents();
-  }, [barId]);
+    fetchEvents()
+  }, [barId])
 
   const handleCheckIn = async (eventId) => {
     if (!userId) {
-      setError('User not logged in');
-      return;
+      setError('User not logged in')
+      return
     }
 
     try {
-      await axios.post(`http://localhost:3001/api/v1/bars/${barId}/events/${eventId}/check_in`, { user_id: userId });
-      const eventsResponse = await axios.get(`http://localhost:3001/api/v1/bars/${barId}/events`);
-      setEvents(eventsResponse.data.events || []);
+      await axios.post(`http://localhost:3001/api/v1/bars/${barId}/events/${eventId}/check_in`, { user_id: userId })
+      const eventsResponse = await axios.get(`http://localhost:3001/api/v1/bars/${barId}/events`)
+      setEvents(eventsResponse.data.events || [])
     } catch (err) {
-      setError('Failed to check in');
+      setError('Failed to check in')
     }
-  };
+  }
 
   const handleFileChange = (event) => {
-    setSelectedFile(event.target.files[0]);
-  };
+    setSelectedFile(event.target.files[0])
+  }
 
   const handleUploadImage = async (eventId) => {
-    if (!selectedFile || !userId || !imageDescription) { // Asegúrate de que haya descripción
-      return;
+    if (!selectedFile || !userId || !imageDescription) {
+      return
     }
 
-    const formData = new FormData();
-    formData.append('event_picture[image]', selectedFile);
-    formData.append('event_picture[description]', imageDescription); // Agregar la descripción
-    formData.append('event_picture[user_id]', userId);
+    const formData = new FormData()
+    formData.append('event_picture[image]', selectedFile)
+    formData.append('event_picture[description]', imageDescription)
+    formData.append('event_picture[user_id]', userId)
 
     try {
       await axios.post(`http://localhost:3001/api/v1/bars/${barId}/events/${eventId}/event_pictures`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
-      });
-      const eventsResponse = await axios.get(`http://localhost:3001/api/v1/bars/${barId}/events`);
-      setEvents(eventsResponse.data.events || []);
-      setSelectedFile(null);
-      setImageDescription(''); // Reiniciar la descripción
-      document.getElementById(`file-input-${eventId}`).value = null;
+      })
+      const eventsResponse = await axios.get(`http://localhost:3001/api/v1/bars/${barId}/events`)
+      setEvents(eventsResponse.data.events || [])
+      setSelectedFile(null)
+      setImageDescription('')
+      document.getElementById(`file-input-${eventId}`).value = null
     } catch (err) {
-      setError('Failed to upload image');
+      setError('Failed to upload image')
     }
-  };
+  }
 
-  if (loading) return <CircularProgress />;
-  if (error) return <Typography color="error">{error}</Typography>;
+  if (loading) return <CircularProgress />
+  if (error) return <Typography color="error">{error}</Typography>
 
   return (
     <div>
@@ -155,19 +156,37 @@ const EventBar = () => {
                 />
                 
                 {/* Campo para ingresar la descripción de la imagen */}
-                <input 
-                  type="text" 
-                  value={imageDescription} 
-                  onChange={(e) => setImageDescription(e.target.value)} 
-                  placeholder="Description of the image" 
-                  style={{ marginTop: '10px', width: '100%' }} 
+                <TextField
+                  variant="outlined"
+                  placeholder="Description of the image"
+                  value={imageDescription}
+                  onChange={(e) => setImageDescription(e.target.value)}
+                  style={{ marginTop: '10px', width: '100%' }}
                 />
+
+                {/* Autocomplete para etiquetar usuarios */}
+                {event.attendees && event.attendees.length > 0 && (
+                  <Autocomplete
+                    options={event.attendees}
+                    getOptionLabel={(option) => option.handle}
+                    onChange={(event, value) => {
+                      if (value) {
+                        const newDescription = imageDescription + ` @${value.handle}`;
+                        setImageDescription(newDescription);
+                      }
+                    }}
+                    renderInput={(params) => (
+                      <TextField {...params} label="Tag Users" variant="outlined" style={{ marginTop: '10px' }} />
+                    )}
+                    freeSolo
+                  />
+                )}
 
                 <Button 
                   variant="contained" 
                   color="secondary" 
                   onClick={() => handleUploadImage(event.id)} 
-                  disabled={!selectedFile || !imageDescription} // Deshabilitar si no hay archivo o descripción
+                  disabled={!selectedFile || !imageDescription}
                   style={{ marginTop: '10px' }}
                 >
                   Upload Image
@@ -202,7 +221,7 @@ const EventBar = () => {
 
       </Grid>
     </div>
-  );
-};
+  )
+}
 
-export default EventBar;
+export default EventBar
