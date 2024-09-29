@@ -9,9 +9,11 @@ const Login = ({ setIsAuthenticated }) => {
 
   const handleLoginSuccess = (data) => {
     const token = data.status.data.token
-    sessionStorage.setItem('jwtToken', token)
+    const userId = data.status.data.user.id // Obtén el ID del usuario de la respuesta
+    sessionStorage.setItem('jwtToken', token) // Almacena el token en sessionStorage
+    sessionStorage.setItem('userId', userId)  // Almacena el ID del usuario en sessionStorage
     setIsAuthenticated(true)
-    navigate('/map')
+    navigate('/map') // Redirige al mapa tras login exitoso
   }
 
   const handleSubmit = async (e) => {
@@ -27,9 +29,9 @@ const Login = ({ setIsAuthenticated }) => {
         body: JSON.stringify({
           user: {
             email: email,
-            password: password
-          }
-        })
+            password: password,
+          },
+        }),
       })
 
       if (response.ok) {
@@ -37,17 +39,17 @@ const Login = ({ setIsAuthenticated }) => {
         handleLoginSuccess(data)
       } else {
         const errorData = await response.json()
-        setError(errorData.message || 'Login failed')
+        setError(errorData.message || 'Login failed') // Manejo de error
       }
     } catch (error) {
-      setError('An error occurred. Please try again.')
+      setError('An error occurred. Please try again.') // Error en caso de fallo de red
     }
   }
 
   return (
     <div style={styles.container}>
       <h2 style={styles.title}>Login</h2>
-      {error && <p style={styles.error}>{error}</p>}
+      {error && <p style={styles.error}>{error}</p>} {/* Muestra error si existe */}
       <form onSubmit={handleSubmit} style={styles.form}>
         <div style={styles.inputGroup}>
           <label style={styles.label}>Email:</label>
@@ -83,7 +85,7 @@ const styles = {
     border: '1px solid #ccc',
     borderRadius: '8px',
     boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
-    backgroundColor: '#343a40', 
+    backgroundColor: '#343a40',
     color: '#ffffff',
   },
   title: {

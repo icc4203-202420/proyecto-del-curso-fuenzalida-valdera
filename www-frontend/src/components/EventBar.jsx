@@ -1,76 +1,91 @@
-import React, { useEffect, useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
-import { Typography, Card, CardContent, Grid, CircularProgress, Button, Avatar, Tooltip } from '@mui/material'
-import axios from 'axios'
+import React, { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { Typography, Card, CardContent, Grid, CircularProgress, Button, Avatar, Tooltip } from '@mui/material';
+import axios from 'axios';
 
 const EventBar = () => {
-  const { id: barId } = useParams()
-  const navigate = useNavigate()
-  const [events, setEvents] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
-  const [userId, setUserId] = useState(null) // Asegúrate de establecer este valor correctamente
-  const [selectedFile, setSelectedFile] = useState(null)
-  const [selectedEventId, setSelectedEventId] = useState(null)
+  const { id: barId } = useParams();
+  const navigate = useNavigate();
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [userId, setUserId] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [selectedEventId, setSelectedEventId] = useState(null);
 
   useEffect(() => {
+    const fetchUserId = () => {
+      const storedUserId = sessionStorage.getItem('userId');
+      if (storedUserId) {
+        setUserId(Number(storedUserId));
+      } else {
+        setError('User ID not found in session storage');
+      }
+    };
+
+    fetchUserId();
+
     const fetchEvents = async () => {
       try {
-        const eventsResponse = await axios.get(`http://localhost:3001/api/v1/bars/${barId}/events`)
-        setEvents(eventsResponse.data.events || [])
+        const eventsResponse = await axios.get(`http://localhost:3001/api/v1/bars/${barId}/events`);
+        setEvents(eventsResponse.data.events || []);
       } catch (err) {
-        setError('Failed to load events')
+        setError('Failed to load events');
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
-  
-    fetchEvents()
-  }, [barId])  
+    };
+
+    fetchEvents();
+  }, [barId]);
 
   const handleCheckIn = async (eventId) => {
     if (!userId) {
-      setError('User not logged in')
-      return
+      setError('User not logged in');
+      return;
     }
-    
+
     try {
-      await axios.post(`http://localhost:3001/api/v1/bars/${barId}/events/${eventId}/check_in`, { user_id: userId })
-      const eventsResponse = await axios.get(`http://localhost:3001/api/v1/bars/${barId}/events`)
-      setEvents(eventsResponse.data.events || [])
+      await axios.post(`http://localhost:3001/api/v1/bars/${barId}/events/${eventId}/check_in`, { user_id: userId });
+      const eventsResponse = await axios.get(`http://localhost:3001/api/v1/bars/${barId}/events`);
+      setEvents(eventsResponse.data.events || []);
     } catch (err) {
-      setError('Failed to check in')
+      setError('Failed to check in');
     }
-  }
+  };
 
   const handleFileChange = (event) => {
-    setSelectedFile(event.target.files[0])
-  }
+    setSelectedFile(event.target.files[0]);
+  };
 
   const handleUploadImage = async (eventId) => {
-    if (!selectedFile) return
+    if (!selectedFile || !userId) {
+      return; 
+    }
 
-    const formData = new FormData()
-    formData.append('event_picture[image]', selectedFile)
-    formData.append('event_picture[description]', 'Image for event')
+    const formData = new FormData();
+    formData.append('event_picture[image]', selectedFile);
+    formData.append('event_picture[description]', 'Image for event');
+    formData.append('event_picture[user_id]', userId);
 
     try {
       await axios.post(`http://localhost:3001/api/v1/bars/${barId}/events/${eventId}/event_pictures`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
-      })
-      const eventsResponse = await axios.get(`http://localhost:3001/api/v1/bars/${barId}/events`)
-      setEvents(eventsResponse.data.events || [])
-      setSelectedFile(null) // Clear selected file
-      setSelectedEventId(null) // Clear selected event id
+      });
+      const eventsResponse = await axios.get(`http://localhost:3001/api/v1/bars/${barId}/events`);
+      setEvents(eventsResponse.data.events || []);
+      setSelectedFile(null);
+      setSelectedEventId(null);
+      document.getElementById(`file-input-${eventId}`).value = null;
     } catch (err) {
-      setError('Failed to upload image')
+      setError('Failed to upload image');
     }
-  }
+  };
 
-  if (loading) return <CircularProgress />
-  if (error) return <Typography color="error">{error}</Typography>
+  if (loading) return <CircularProgress />;
+  if (error) return <Typography color="error">{error}</Typography>;
 
   return (
     <div>
@@ -129,6 +144,7 @@ const EventBar = () => {
                   )}
 
                   <input 
+                    id={`file-input-${event.id}`}
                     type="file" 
                     accept="image/*" 
                     onChange={handleFileChange} 
@@ -151,8 +167,24 @@ const EventBar = () => {
           <Typography>No events found</Typography>
         )}
       </Grid>
-    </div>
-  )
-}
 
-export default EventBar
+      {/* Sección para mostrar las imágenes de los eventos en una cuadrícula */}
+      <Typography variant="h5" style={{ marginTop: '20px' }}>Event Images</Typography>
+      <Grid container spacing={3}>
+        {events.filter(event => event.flyer_url).map(event => (
+          <Grid item xs={12} sm={6} md={4} key={`image-${event.id}`}>
+            <Card>
+              <img
+                src={event.flyer_url}
+                alt={`${event.name} Flyer`}
+                style={{ width: '100%', height: 'auto' }}
+              />
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
+    </div>
+  );
+};
+
+export default EventBar;
