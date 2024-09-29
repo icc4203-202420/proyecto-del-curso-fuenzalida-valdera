@@ -72,12 +72,12 @@ const BeerList = () => {
                 </Typography>
               </CardContent>
               <CardActions style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                <Button size="small" variant="outlined">
+                <Button size="small" variant="outlined" style={{ marginTop: '8px' }}>
                   <Link to={`/beers/${beer.id}/reviews`} style={{ textDecoration: 'none', color: 'inherit' }}>
                     View Reviews
                   </Link>
                 </Button>
-                <Button size="small" variant="outlined">
+                <Button size="small" variant="outlined" style={{ marginTop: '8px' }}>
                   <Link to={`/beers/${beer.id}/add-review`} style={{ textDecoration: 'none', color: 'inherit' }}>
                     Add Review
                   </Link>

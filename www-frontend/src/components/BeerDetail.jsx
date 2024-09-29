@@ -10,8 +10,7 @@ import {
   Divider,
   Paper,
 } from '@mui/material'
-import ReviewForm from './ReviewForm'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 
 const reviewsReducer = (state, action) => {
@@ -27,6 +26,8 @@ const reviewsReducer = (state, action) => {
       }
     case 'FETCH_FAILURE':
       return { ...state, loading: false, error: action.payload }
+    case 'SET_PAGE':
+      return { ...state, page: action.page }; // Agregado para establecer la página
     default:
       throw new Error()
   }
@@ -34,6 +35,7 @@ const reviewsReducer = (state, action) => {
 
 const BeerDetail = () => {
   const { id } = useParams()
+  const navigate = useNavigate()
   const [beer, setBeer] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -70,7 +72,7 @@ const BeerDetail = () => {
       dispatch({ type: 'FETCH_INIT', page: reviewsState.page })
       try {
         const response = await axios.get(`http://localhost:3001/api/v1/beers/${id}/reviews`, {
-          params: { page: reviewsState.page, per_page: 5 },
+          params: { page: reviewsState.page, per_page: 1 }, // Solo una reseña a la vez
         })
         const data = response.data
         dispatch({ type: 'FETCH_SUCCESS', payload: { reviews: data.reviews, totalPages: data.total_pages } })
@@ -88,6 +90,8 @@ const BeerDetail = () => {
   if (error) return <Typography color="error">{error}</Typography>
   if (!beer) return <Typography color="#ffffff">No details available for this beer.</Typography>
 
+  const currentReview = reviewsState.reviews[0] || null;
+
   return (
     <Container style={{ backgroundColor: '#121212', color: '#ffffff', padding: '20px', borderRadius: '8px' }}>
       <Paper elevation={3} style={{ padding: '20px', marginBottom: '20px', backgroundColor: '#1e1e1e' }}>
@@ -101,45 +105,54 @@ const BeerDetail = () => {
         <Typography variant="body1" style={{ color: '#ffffff' }}>Average Rating: {beer.avg_rating !== null ? beer.avg_rating : 'No rating available'}</Typography>
       </Paper>
 
-      <ReviewForm beerId={beer.id} />
+      <Button
+        onClick={() => navigate(`/beers/${id}/add-review`)} // Redirige al formulario de reseñas
+        style={{ marginBottom: '20px', color: '#ffffff', backgroundColor: '#007bff' }}
+      >
+        Add Review
+      </Button>
 
       <Typography variant="h6" gutterBottom style={{ color: '#ffffff' }}>
-        Reviews
+        Review
       </Typography>
 
       {reviewsState.loading ? (
         <CircularProgress />
-      ) : (
+      ) : currentReview ? (
         <List style={{ backgroundColor: '#1e1e1e', borderRadius: '8px' }}>
-          {reviewsState.reviews.length > 0 ? (
-            reviewsState.reviews.map((review) => (
-              <React.Fragment key={review.id}>
-                <ListItem>
-                  <ListItemText 
-                    primary={`Rating: ${review.rating}`} 
-                    secondary={review.text} 
-                    primaryTypographyProps={{ style: { color: '#ffffff' } }} // Color blanco para el texto principal
-                    secondaryTypographyProps={{ style: { color: '#ffffff' } }} // Color blanco para el texto secundario
-                  />
-                </ListItem>
-                <Divider />
-              </React.Fragment>
-            ))
-          ) : (
-            <Typography color="#ffffff">No reviews available</Typography> // Texto blanco
-          )}
+          <ListItem>
+            <ListItemText 
+              primary={`Rating: ${currentReview.rating}`} 
+              secondary={currentReview.text} 
+              primaryTypographyProps={{ style: { color: '#ffffff' } }} // Color blanco para el texto principal
+              secondaryTypographyProps={{ style: { color: '#ffffff' } }} // Color blanco para el texto secundario
+            />
+          </ListItem>
+          <Divider />
         </List>
+      ) : (
+        <Typography color="#ffffff">No reviews available</Typography> // Texto blanco
       )}
 
       <Button
-        onClick={() => dispatch({ type: 'FETCH_INIT', page: reviewsState.page - 1 })}
+        onClick={() => {
+          const newPage = reviewsState.page - 1;
+          if (newPage >= 1) {
+            dispatch({ type: 'SET_PAGE', page: newPage });
+          }
+        }}
         disabled={reviewsState.page === 1}
         style={{ marginRight: '10px', color: '#ffffff', backgroundColor: '#007bff' }}
       >
         Previous
       </Button>
       <Button
-        onClick={() => dispatch({ type: 'FETCH_INIT', page: reviewsState.page + 1 })}
+        onClick={() => {
+          const newPage = reviewsState.page + 1;
+          if (newPage <= reviewsState.totalPages) {
+            dispatch({ type: 'SET_PAGE', page: newPage });
+          }
+        }}
         disabled={reviewsState.page === reviewsState.totalPages}
         style={{ color: '#ffffff', backgroundColor: '#007bff' }}
       >
