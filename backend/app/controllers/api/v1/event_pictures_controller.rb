@@ -7,11 +7,16 @@ class API::V1::EventPicturesController < ApplicationController
 
 
     if @event_picture.save
-      render json: @event_picture, status: :created
+      render json: {
+        id: @event_picture.id,
+        image_url: url_for(@event_picture.image),  # Incluye la URL de la imagen al devolver la respuesta
+        description: @event_picture.description
+      }, status: :created
     else
       Rails.logger.debug @event_picture.errors.full_messages
       render json: @event_picture.errors, status: :unprocessable_entity
     end
+
   end
 
   private

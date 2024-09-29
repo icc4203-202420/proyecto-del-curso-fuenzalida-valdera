@@ -17,17 +17,26 @@ class API::V1::EventsController < ApplicationController
           name: event.name,
           description: event.description,
           date: event.date,
+          flyer_url: event.flyer.attached? ? url_for(event.flyer) : nil,  # Asegura que se incluya la URL del flyer
           attendees: event.users.map do |user|
             {
               id: user.id,
               name: "#{user.first_name} #{user.last_name}",
               handle: user.handle
             }
+          end,
+          event_pictures: event.event_pictures.map do |picture|
+            {
+              id: picture.id,
+              image_url: url_for(picture.image),  # Asegura que se incluya la URL de las imágenes de los eventos
+              description: picture.description
+            }
           end
         }
       end
     }
   end
+
 
   def show
     address = Address.find_by(id: Bar.find_by(id: @event.bar_id).address_id)
