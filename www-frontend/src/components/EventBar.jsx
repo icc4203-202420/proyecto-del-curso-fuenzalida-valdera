@@ -85,6 +85,22 @@ const EventBar = () => {
     }
   }
 
+  const formatDescription = (description) => {
+    const regex = /@(\w+)/g
+    const parts = description.split(regex)
+
+    return parts.map((part, index) => {
+      if (index % 2 === 1) { // Si es un usuario etiquetado
+        return (
+          <span key={index} style={{ color: 'blue', cursor: 'pointer' }} onClick={() => console.log(`Navigate to ${part}`)}>
+            @{part}
+          </span>
+        )
+      }
+      return part // Texto normal
+    })
+  }
+
   if (loading) return <CircularProgress />
   if (error) return <Typography color="error">{error}</Typography>
 
@@ -204,7 +220,9 @@ const EventBar = () => {
                             style={{ width: '100%', height: 'auto' }}
                           />
                           <CardContent>
-                            <Typography>{picture.description}</Typography>
+                            <Typography>
+                              {formatDescription(picture.description)}
+                            </Typography>
                           </CardContent>
                         </Card>
                       </Grid>
