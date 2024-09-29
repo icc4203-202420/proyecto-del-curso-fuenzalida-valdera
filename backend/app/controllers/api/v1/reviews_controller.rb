@@ -22,7 +22,7 @@ class API::V1::ReviewsController < ApplicationController
 
     # Renderiza las reseñas incluyendo el handle del usuario
     render json: {
-      reviews: reviews.map { |review|
+      reviews: reviews.map { |review| 
         {
           id: review.id,
           text: review.text,
@@ -38,21 +38,22 @@ class API::V1::ReviewsController < ApplicationController
   end
 
   def show
-    if @review
-      render json: @review, status: :ok
-    else
-      render json: { error: "Review not found" }, status: :not_found
-    end
+    render json: @review, status: :ok
   end
 
   def create
-    @review = Review.new(review_params)
-    if @review.save
-      render json: @review, status: :created, location: api_v1_review_url(@review)
+    current_user = get_current_user_from_token
+    beer = Beer.find(params[:beer_id])
+    review = beer.reviews.build(review_params)
+  
+    review.user = current_user
+  
+    if review.save
+      render json: review, status: :created
     else
-      render json: @review.errors, status: :unprocessable_entity
+      render json: { errors: review.errors.full_messages }, status: :unprocessable_entity # Muestra los errores
     end
-  end
+  end  
 
   def update
     if @review.update(review_params)
@@ -75,6 +76,18 @@ class API::V1::ReviewsController < ApplicationController
   end
 
   def review_params
-    params.require(:review).permit(:text, :rating, :beer_id).merge(user_id: current_user.id) # Asigna el user_id
+    params.require(:review).permit(:rating, :text) # Permite estos parámetros
+  end
+
+  def get_current_user_from_token
+    token = request.headers['Authorization']&.split(' ')&.last # Obtiene el token del encabezado
+    return unless token
+
+    begin
+      decoded_token = JWT.decode(token, Rails.application.credentials.secret_key_base)[0]
+      User.find(decoded_token['user_id']) # Encuentra el usuario por ID en el token
+    rescue JWT::DecodeError
+      nil # En caso de error al decodificar, devuelve nil
+    end
   end
 end

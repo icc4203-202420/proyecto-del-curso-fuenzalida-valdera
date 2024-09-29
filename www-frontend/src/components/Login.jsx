@@ -73,6 +73,13 @@ const Login = ({ setIsAuthenticated }) => {
         </div>
         <button type="submit" style={styles.button}>Login</button>
       </form>
+      <p style={styles.registerText}>Don't have an account yet? 
+        <button 
+          onClick={() => navigate('/register')} 
+          style={styles.registerButton}>
+          Register
+        </button>
+      </p>
     </div>
   )
 }
@@ -125,6 +132,18 @@ const styles = {
     color: '#fff',
     cursor: 'pointer',
     transition: 'background-color 0.3s',
+  },
+  registerText: {
+    textAlign: 'center',
+    marginTop: '15px',
+  },
+  registerButton: {
+    marginLeft: '5px',
+    background: 'none',
+    border: 'none',
+    color: '#007bff',
+    cursor: 'pointer',
+    textDecoration: 'underline',
   },
 }
 
