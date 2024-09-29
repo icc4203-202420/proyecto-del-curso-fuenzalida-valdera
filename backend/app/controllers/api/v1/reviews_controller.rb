@@ -14,13 +14,27 @@ class API::V1::ReviewsController < ApplicationController
     offset = (page - 1) * per_page
 
     # Obtener las reseñas con limit y offset
-    reviews = beer.reviews.limit(per_page).offset(offset)
+    reviews = beer.reviews.includes(:user).limit(per_page).offset(offset) # Incluye el usuario
 
     # Contar el total de reseñas para calcular total_pages
     total_reviews = beer.reviews.count
     total_pages = (total_reviews.to_f / per_page).ceil
 
-    render json: { reviews: reviews, total_pages: total_pages }
+    # Renderiza las reseñas incluyendo el handle del usuario
+    render json: {
+      reviews: reviews.map { |review|
+        {
+          id: review.id,
+          text: review.text,
+          rating: review.rating,
+          user: {
+            id: review.user.id,
+            handle: review.user.handle
+          }
+        }
+      },
+      total_pages: total_pages
+    }
   end
 
   def show
@@ -61,6 +75,6 @@ class API::V1::ReviewsController < ApplicationController
   end
 
   def review_params
-    params.require(:review).permit(:text, :rating, :beer_id)
+    params.require(:review).permit(:text, :rating, :beer_id).merge(user_id: current_user.id) # Asigna el user_id
   end
 end

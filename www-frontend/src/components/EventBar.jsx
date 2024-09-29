@@ -44,27 +44,25 @@ const EventBar = () => {
 
   const handleCheckIn = async (eventId) => {
     const token = sessionStorage.getItem('jwtToken')
-  
-    // Verifica que el token esté disponible
+
     if (!token) {
       setError('Token not found. Please log in again.')
       setSnackbarOpen(true)
       return
     }
-  
+
     const data = {
       user_id: userId,
       event: String(eventId),
     }
-  
+
     try {
       await axios.post(
         `http://localhost:3001/api/v1/bars/${barId}/events/${eventId}/check_in`,
         data,
         { headers: { Authorization: `Bearer ${token}` } }
       )
-  
-      // Refrescar eventos después de un check-in exitoso
+
       const eventsResponse = await axios.get(`http://localhost:3001/api/v1/bars/${barId}/events`)
       setEvents(eventsResponse.data.events || [])
     } catch (error) {
@@ -164,7 +162,6 @@ const EventBar = () => {
                   {new Date(event.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </Typography>
 
-                {/* Mostrar los asistentes */}
                 <Typography variant="body1" style={{ marginTop: '10px' }}>Attendees</Typography>
                 <div style={{ display: 'flex', overflowX: 'scroll', padding: '10px 0' }}>
                   {event.attendees && event.attendees.length > 0 ? (
@@ -181,7 +178,6 @@ const EventBar = () => {
                   )}
                 </div>
 
-                {/* Check-in button */}
                 {event.user_has_checked_in ? (
                   <Button variant="outlined" disabled style={{ marginTop: '10px' }}>You're in!</Button>
                 ) : (
@@ -195,7 +191,6 @@ const EventBar = () => {
                   </Button>
                 )}
 
-                {/* Input para subir imágenes desde cámara o galería */}
                 <input 
                   id={`file-input-${event.id}`}
                   type="file" 
@@ -205,7 +200,6 @@ const EventBar = () => {
                   style={{ marginTop: '10px' }}
                 />
                 
-                {/* Campo para ingresar la descripción de la imagen */}
                 <TextField
                   variant="outlined"
                   placeholder="Description of the image"
@@ -214,7 +208,6 @@ const EventBar = () => {
                   style={{ marginTop: '10px', width: '100%' }}
                 />
 
-                {/* Autocomplete para etiquetar usuarios */}
                 {event.attendees && event.attendees.length > 0 && (
                   <Autocomplete
                     options={event.attendees}
@@ -242,40 +235,34 @@ const EventBar = () => {
                   Upload Image
                 </Button>
 
-                {/* Mostrar imágenes asociadas al evento */}
+                {/* Contenedor de imágenes con scroll */}
                 {event.event_pictures && event.event_pictures.length > 0 && (
-                  <Grid container spacing={2} style={{ marginTop: '10px' }}>
-                    {event.event_pictures.map(picture => (
-                      <Grid item xs={12} sm={6} md={4} key={picture.id}>
-                        <Card>
-                          <img
-                            src={picture.image_url}
-                            alt={picture.description || 'Event image'}
-                            style={{ width: '100%', height: 'auto' }}
+                  <div style={{ maxHeight: '200px', overflowY: 'auto', marginTop: '10px' }}>
+                    <Grid container spacing={2}>
+                      {event.event_pictures.map(picture => (
+                        <Grid item xs={6} key={picture.id}>
+                          <img 
+                            src={picture.image_url} 
+                            alt={picture.description} 
+                            style={{ width: '100%', borderRadius: '8px' }} 
                           />
-                          <CardContent>
-                            <Typography>
-                              {formatDescription(picture.description)}
-                            </Typography>
-                          </CardContent>
-                        </Card>
-                      </Grid>
-                    ))}
-                  </Grid>
+                          <Typography variant="caption">{formatDescription(picture.description)}</Typography>
+                        </Grid>
+                      ))}
+                    </Grid>
+                  </div>
                 )}
               </CardContent>
             </Card>
           </Grid>
         ))
       ) : (
-        <Typography>No events found</Typography>
+        <Typography>No events found for this bar</Typography>
       )}
       </Grid>
 
       <Snackbar open={snackbarOpen} autoHideDuration={6000} onClose={handleCloseSnackbar}>
-        <Alert onClose={handleCloseSnackbar} severity="error" sx={{ width: '100%' }}>
-          {error}
-        </Alert>
+        <Alert onClose={handleCloseSnackbar} severity="error">{error}</Alert>
       </Snackbar>
     </div>
   )
