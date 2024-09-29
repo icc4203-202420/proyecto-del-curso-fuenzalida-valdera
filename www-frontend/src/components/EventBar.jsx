@@ -11,6 +11,7 @@ const EventBar = () => {
   const [error, setError] = useState('');
   const [userId, setUserId] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
+  const [imageDescription, setImageDescription] = useState(''); // Estado para la descripción de la imagen
 
   useEffect(() => {
     const fetchUserId = () => {
@@ -58,13 +59,13 @@ const EventBar = () => {
   };
 
   const handleUploadImage = async (eventId) => {
-    if (!selectedFile || !userId) {
+    if (!selectedFile || !userId || !imageDescription) { // Asegúrate de que haya descripción
       return;
     }
 
     const formData = new FormData();
     formData.append('event_picture[image]', selectedFile);
-    formData.append('event_picture[description]', 'Image for event');
+    formData.append('event_picture[description]', imageDescription); // Agregar la descripción
     formData.append('event_picture[user_id]', userId);
 
     try {
@@ -76,6 +77,7 @@ const EventBar = () => {
       const eventsResponse = await axios.get(`http://localhost:3001/api/v1/bars/${barId}/events`);
       setEvents(eventsResponse.data.events || []);
       setSelectedFile(null);
+      setImageDescription(''); // Reiniciar la descripción
       document.getElementById(`file-input-${eventId}`).value = null;
     } catch (err) {
       setError('Failed to upload image');
@@ -100,92 +102,103 @@ const EventBar = () => {
 
       <Grid container spacing={3}>
       {events.length > 0 ? (
-  events.map(event => (
-    <Grid item xs={12} sm={6} md={4} key={event.id}>
-      <Card>
-        <CardContent>
-          <Typography variant="h6">{event.name}</Typography>
-          <Typography color="textSecondary">{event.description}</Typography>
-          <Typography color="textSecondary">
-            {new Date(event.date).toLocaleDateString()}{' '}
-            {new Date(event.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-          </Typography>
+        events.map(event => (
+          <Grid item xs={12} sm={6} md={4} key={event.id}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6">{event.name}</Typography>
+                <Typography color="textSecondary">{event.description}</Typography>
+                <Typography color="textSecondary">
+                  {new Date(event.date).toLocaleDateString()}{' '}
+                  {new Date(event.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </Typography>
 
-          {/* Mostrar los asistentes */}
-          <Typography variant="body1" style={{ marginTop: '10px' }}>Attendees</Typography>
-          <div style={{ display: 'flex', overflowX: 'scroll', padding: '10px 0' }}>
-            {event.attendees && event.attendees.length > 0 ? (
-              event.attendees.map(attendee => (
-                <div key={attendee.id} style={{ marginRight: '10px', textAlign: 'center' }}>
-                  <Tooltip title={attendee.handle}>
-                    <Avatar alt={attendee.name} src={attendee.avatar_url} />
-                  </Tooltip>
-                  <Typography variant="caption" style={{ marginTop: '5px' }}>{attendee.handle}</Typography>
+                {/* Mostrar los asistentes */}
+                <Typography variant="body1" style={{ marginTop: '10px' }}>Attendees</Typography>
+                <div style={{ display: 'flex', overflowX: 'scroll', padding: '10px 0' }}>
+                  {event.attendees && event.attendees.length > 0 ? (
+                    event.attendees.map(attendee => (
+                      <div key={attendee.id} style={{ marginRight: '10px', textAlign: 'center' }}>
+                        <Tooltip title={attendee.handle}>
+                          <Avatar alt={attendee.name} src={attendee.avatar_url} />
+                        </Tooltip>
+                        <Typography variant="caption" style={{ marginTop: '5px' }}>{attendee.handle}</Typography>
+                      </div>
+                    ))
+                  ) : (
+                    <Typography>No attendees for this event</Typography>
+                  )}
                 </div>
-              ))
-            ) : (
-              <Typography>No attendees for this event</Typography>
-            )}
-          </div>
 
-          {/* Check-in button */}
-          {event.user_has_checked_in ? (
-            <Button variant="outlined" disabled style={{ marginTop: '10px' }}>You're in!</Button>
-          ) : (
-            <Button 
-              variant="contained" 
-              color="primary" 
-              onClick={() => handleCheckIn(event.id)} 
-              style={{ marginTop: '10px' }}
-            >
-              Check In
-            </Button>
-          )}
+                {/* Check-in button */}
+                {event.user_has_checked_in ? (
+                  <Button variant="outlined" disabled style={{ marginTop: '10px' }}>You're in!</Button>
+                ) : (
+                  <Button 
+                    variant="contained" 
+                    color="primary" 
+                    onClick={() => handleCheckIn(event.id)} 
+                    style={{ marginTop: '10px' }}
+                  >
+                    Check In
+                  </Button>
+                )}
 
-          {/* Input para subir imágenes */}
-          <input 
-            id={`file-input-${event.id}`}
-            type="file" 
-            accept="image/*" 
-            onChange={handleFileChange} 
-            style={{ marginTop: '10px' }}
-          />
-          <Button 
-            variant="contained" 
-            color="secondary" 
-            onClick={() => handleUploadImage(event.id)} 
-            disabled={!selectedFile} 
-            style={{ marginTop: '10px' }}
-          >
-            Upload Image
-          </Button>
+                {/* Input para subir imágenes desde cámara o galería */}
+                <input 
+                  id={`file-input-${event.id}`}
+                  type="file" 
+                  accept="image/*" 
+                  capture="environment" // Esto permite capturar desde la cámara en dispositivos móviles
+                  onChange={handleFileChange} 
+                  style={{ marginTop: '10px' }}
+                />
+                
+                {/* Campo para ingresar la descripción de la imagen */}
+                <input 
+                  type="text" 
+                  value={imageDescription} 
+                  onChange={(e) => setImageDescription(e.target.value)} 
+                  placeholder="Description of the image" 
+                  style={{ marginTop: '10px', width: '100%' }} 
+                />
 
-          {/* Mostrar imágenes asociadas al evento */}
-          {event.event_pictures && event.event_pictures.length > 0 && (
-            <Grid container spacing={2} style={{ marginTop: '10px' }}>
-              {event.event_pictures.map(picture => (
-                <Grid item xs={12} sm={6} md={4} key={picture.id}>
-                  <Card>
-                    <img
-                      src={picture.image_url}
-                      alt={picture.description || 'Event image'}
-                      style={{ width: '100%', height: 'auto' }}
-                    />
-                    <CardContent>
-                      <Typography>{picture.description}</Typography>
-                    </CardContent>
-                  </Card>
-                </Grid>
-              ))}
-            </Grid>
-          )}
-        </CardContent>
-      </Card>
-    </Grid>
-  ))
-) : (
-  <Typography>No events found</Typography>
-)}
+                <Button 
+                  variant="contained" 
+                  color="secondary" 
+                  onClick={() => handleUploadImage(event.id)} 
+                  disabled={!selectedFile || !imageDescription} // Deshabilitar si no hay archivo o descripción
+                  style={{ marginTop: '10px' }}
+                >
+                  Upload Image
+                </Button>
+
+                {/* Mostrar imágenes asociadas al evento */}
+                {event.event_pictures && event.event_pictures.length > 0 && (
+                  <Grid container spacing={2} style={{ marginTop: '10px' }}>
+                    {event.event_pictures.map(picture => (
+                      <Grid item xs={12} sm={6} md={4} key={picture.id}>
+                        <Card>
+                          <img
+                            src={picture.image_url}
+                            alt={picture.description || 'Event image'}
+                            style={{ width: '100%', height: 'auto' }}
+                          />
+                          <CardContent>
+                            <Typography>{picture.description}</Typography>
+                          </CardContent>
+                        </Card>
+                      </Grid>
+                    ))}
+                  </Grid>
+                )}
+              </CardContent>
+            </Card>
+          </Grid>
+        ))
+      ) : (
+        <Typography>No events found</Typography>
+      )}
 
       </Grid>
     </div>
