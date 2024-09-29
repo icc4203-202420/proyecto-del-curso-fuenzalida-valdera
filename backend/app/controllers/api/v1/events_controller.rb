@@ -89,19 +89,25 @@ class API::V1::EventsController < ApplicationController
 
   def check_in
     event = Event.find_by(id: params[:id])
-
+  
     if event.nil?
       render json: { success: false, message: 'Event not found' }, status: :not_found
       return
     end
-
-    if current_user.nil?
-      render json: { success: false, message: 'User not authenticated' }, status: :unauthorized
+  
+    # Usa el user_id enviado en los parámetros
+    user_id = params[:user_id]
+  
+    # Encuentra al usuario basado en el user_id proporcionado
+    user = User.find_by(id: user_id)
+  
+    if user.nil?
+      render json: { success: false, message: 'User not found' }, status: :not_found
       return
     end
-
-    attendance = Attendance.find_or_initialize_by(user_id: current_user.id, event_id: event.id)
-
+  
+    attendance = Attendance.find_or_initialize_by(user_id: user.id, event_id: event.id)
+  
     if attendance.checked_in
       render json: { success: false, message: 'Already checked in' }, status: :unprocessable_entity
     else
@@ -111,7 +117,7 @@ class API::V1::EventsController < ApplicationController
         render json: { success: false, message: 'Failed to check in' }, status: :unprocessable_entity
       end
     end
-  end
+  end  
 
   private
 

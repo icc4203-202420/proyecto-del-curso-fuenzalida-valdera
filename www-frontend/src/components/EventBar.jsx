@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { Typography, Card, CardContent, Grid, CircularProgress, Button, Avatar, Tooltip, Autocomplete, TextField } from '@mui/material'
+import { Typography, Card, CardContent, Grid, CircularProgress, Button, Avatar, Tooltip, Autocomplete, TextField, Snackbar, Alert } from '@mui/material'
 import axios from 'axios'
 
 const EventBar = () => {
@@ -9,6 +9,7 @@ const EventBar = () => {
   const [events, setEvents] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [snackbarOpen, setSnackbarOpen] = useState(false)
   const [userId, setUserId] = useState(null)
   const [selectedFile, setSelectedFile] = useState(null)
   const [imageDescription, setImageDescription] = useState('')
@@ -21,10 +22,9 @@ const EventBar = () => {
         setUserId(Number(storedUserId))
       } else {
         setError('User ID not found in session storage')
+        setSnackbarOpen(true)
       }
     }
-
-    fetchUserId()
 
     const fetchEvents = async () => {
       try {
@@ -32,28 +32,57 @@ const EventBar = () => {
         setEvents(eventsResponse.data.events || [])
       } catch (err) {
         setError('Failed to load events')
+        setSnackbarOpen(true)
       } finally {
         setLoading(false)
       }
     }
 
+    fetchUserId()
     fetchEvents()
   }, [barId])
 
   const handleCheckIn = async (eventId) => {
-    if (!userId) {
-      setError('User not logged in')
+    const token = sessionStorage.getItem('jwtToken')
+  
+    // Verifica que el token esté disponible
+    if (!token) {
+      setError('Token not found. Please log in again.')
+      setSnackbarOpen(true)
       return
     }
-
+  
+    const data = {
+      user_id: userId,
+      event: String(eventId),
+    }
+  
     try {
-      await axios.post(`http://localhost:3001/api/v1/bars/${barId}/events/${eventId}/check_in`, { user_id: userId })
+      await axios.post(
+        `http://localhost:3001/api/v1/bars/${barId}/events/${eventId}/check_in`,
+        data,
+        { headers: { Authorization: `Bearer ${token}` } }
+      )
+  
+      // Refrescar eventos después de un check-in exitoso
       const eventsResponse = await axios.get(`http://localhost:3001/api/v1/bars/${barId}/events`)
       setEvents(eventsResponse.data.events || [])
-    } catch (err) {
-      setError('Failed to check in')
+    } catch (error) {
+      console.error('Error:', error)
+      
+      if (error.response) {
+        if (error.response.status === 401) {
+          setError('Unauthorized. Please check your token.')
+        } else {
+          setError('Failed to check in: ' + error.response.data.message)
+        }
+      } else {
+        setError('Something went wrong. Please try again.')
+      }
+      
+      setSnackbarOpen(true)
     }
-  }
+  }  
 
   const handleFileChange = (event) => {
     setSelectedFile(event.target.files[0])
@@ -82,6 +111,7 @@ const EventBar = () => {
       document.getElementById(`file-input-${eventId}`).value = null
     } catch (err) {
       setError('Failed to upload image')
+      setSnackbarOpen(true)
     }
   }
 
@@ -90,15 +120,19 @@ const EventBar = () => {
     const parts = description.split(regex)
 
     return parts.map((part, index) => {
-      if (index % 2 === 1) { // Si es un usuario etiquetado
+      if (index % 2 === 1) {
         return (
           <span key={index} style={{ color: 'blue', cursor: 'pointer' }} onClick={() => console.log(`Navigate to ${part}`)}>
             @{part}
           </span>
         )
       }
-      return part // Texto normal
+      return part
     })
+  }
+
+  const handleCloseSnackbar = () => {
+    setSnackbarOpen(false)
   }
 
   if (loading) return <CircularProgress />
@@ -166,7 +200,7 @@ const EventBar = () => {
                   id={`file-input-${event.id}`}
                   type="file" 
                   accept="image/*" 
-                  capture="environment" // Esto permite capturar desde la cámara en dispositivos móviles
+                  capture="environment"
                   onChange={handleFileChange} 
                   style={{ marginTop: '10px' }}
                 />
@@ -187,8 +221,8 @@ const EventBar = () => {
                     getOptionLabel={(option) => option.handle}
                     onChange={(event, value) => {
                       if (value) {
-                        const newDescription = imageDescription + ` @${value.handle}`;
-                        setImageDescription(newDescription);
+                        const newDescription = imageDescription + ` @${value.handle}`
+                        setImageDescription(newDescription)
                       }
                     }}
                     renderInput={(params) => (
@@ -236,8 +270,13 @@ const EventBar = () => {
       ) : (
         <Typography>No events found</Typography>
       )}
-
       </Grid>
+
+      <Snackbar open={snackbarOpen} autoHideDuration={6000} onClose={handleCloseSnackbar}>
+        <Alert onClose={handleCloseSnackbar} severity="error" sx={{ width: '100%' }}>
+          {error}
+        </Alert>
+      </Snackbar>
     </div>
   )
 }
