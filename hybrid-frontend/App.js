@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from 'react'
+import 'react-native-gesture-handler'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import { NavigationContainer } from '@react-navigation/native'
 import { createStackNavigator } from '@react-navigation/stack'
-import { View, Text, Button, SafeAreaView, StyleSheet, TouchableOpacity } from 'react-native'
-import AsyncStorage from '@react-native-async-storage/async-storage'
-import { Appbar, Drawer } from 'react-native-paper'
+import { View, Text, SafeAreaView, StyleSheet, TouchableOpacity } from 'react-native'
+import { Appbar } from 'react-native-paper'
 import Home from './components/Home'
 import Login from './components/Login'
 import Register from './components/Register'
 import Map from './components/Map'
 import BeerList from './components/BeerList'
-import BarList from './components/BarList'
-import UserSearch from './components/UserSearch'
 
 const Stack = createStackNavigator()
 
@@ -39,12 +38,6 @@ const App = () => {
       <TouchableOpacity style={styles.drawerItem} onPress={() => navigation.navigate('BeerList')}>
         <Text style={styles.drawerText}>Beers</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.drawerItem} onPress={() => navigation.navigate('BarList')}>
-        <Text style={styles.drawerText}>Bars</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.drawerItem} onPress={() => navigation.navigate('UserSearch')}>
-        <Text style={styles.drawerText}>Search Users</Text>
-      </TouchableOpacity>
       <TouchableOpacity style={styles.drawerItem} onPress={() => { handleLogout(); navigation.navigate('Login') }}>
         <Text style={styles.drawerText}>Logout</Text>
       </TouchableOpacity>
@@ -71,8 +64,6 @@ const App = () => {
               <Stack.Screen name="Home" component={Home} />
               <Stack.Screen name="Map" component={Map} />
               <Stack.Screen name="BeerList" component={BeerList} />
-              <Stack.Screen name="BarList" component={BarList} />
-              <Stack.Screen name="UserSearch" component={UserSearch} />
             </>
           ) : (
             <>
