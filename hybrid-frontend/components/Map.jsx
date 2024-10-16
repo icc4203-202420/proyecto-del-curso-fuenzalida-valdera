@@ -4,7 +4,7 @@ import { View, Text, StyleSheet } from 'react-native'
 const Map = () => {
   return (
     <View style={styles.container}>
-      <Text>No hay mapa disponible en este momento.</Text>
+      <Text>No map available at the moment.</Text>
     </View>
   )
 }
