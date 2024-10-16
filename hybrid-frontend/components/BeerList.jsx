@@ -1,41 +1,41 @@
-import React, { useEffect, useState } from 'react'
-import { View, TextInput, Text, Button, StyleSheet, FlatList, ActivityIndicator } from 'react-native'
-import axios from 'axios'
-import { Rating } from 'react-native-ratings' // Asegúrate de instalar esta biblioteca
-import { useNavigation } from '@react-navigation/native'
+import React, { useEffect, useState } from 'react';
+import { View, TextInput, Text, Button, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
+import axios from 'axios';
+import { Rating } from 'react-native-ratings'; // Asegúrate de instalar esta biblioteca
+import { useNavigation } from '@react-navigation/native';
 
 const BeerList = () => {
-  const [beers, setBeers] = useState([])
-  const [search, setSearch] = useState('')
-  const [filteredBeers, setFilteredBeers] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
-  const navigation = useNavigation()
+  const [beers, setBeers] = useState([]);
+  const [search, setSearch] = useState('');
+  const [filteredBeers, setFilteredBeers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const navigation = useNavigation();
 
   useEffect(() => {
     const fetchBeers = async () => {
       try {
-        const response = await axios.get('http://localhost:3001/api/v1/beers')
-        setBeers(response.data.beers)
-        setFilteredBeers(response.data.beers)
+        const response = await axios.get('http://localhost:3001/api/v1/beers');
+        setBeers(response.data.beers);
+        setFilteredBeers(response.data.beers);
       } catch (err) {
-        setError('Failed to load beers')
+        setError('Failed to load beers');
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    fetchBeers()
-  }, [])
+    fetchBeers();
+  }, []);
 
   useEffect(() => {
     setFilteredBeers(
       beers.filter(beer => beer.name.toLowerCase().includes(search.toLowerCase()))
-    )
-  }, [search, beers])
+    );
+  }, [search, beers]);
 
-  if (loading) return <ActivityIndicator size="large" color="#0000ff" />
-  if (error) return <Text style={styles.error}>{error}</Text>
+  if (loading) return <ActivityIndicator size="large" color="#0000ff" />;
+  if (error) return <Text style={styles.error}>{error}</Text>;
 
   return (
     <View style={styles.container}>
@@ -59,7 +59,7 @@ const BeerList = () => {
             />
             <Text style={styles.description}>{item.description}</Text>
             <View style={styles.buttonContainer}>
-              <Button title="View Reviews" onPress={() => navigation.navigate('Reviews', { beerId: item.id })} />
+              <Button title="View Reviews" onPress={() => navigation.navigate('BeerReviews', { beerId: item.id })} />
               <Button title="Add Review" onPress={() => navigation.navigate('AddReview', { beerId: item.id })} />
               <Button title="See Details" onPress={() => navigation.navigate('BeerDetails', { beerId: item.id })} />
             </View>
@@ -67,8 +67,8 @@ const BeerList = () => {
         )}
       />
     </View>
-  )
-}
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -108,6 +108,6 @@ const styles = StyleSheet.create({
     color: 'red',
     textAlign: 'center',
   },
-})
+});
 
-export default BeerList
+export default BeerList;
