@@ -85,8 +85,8 @@ const ReviewForm = () => {
         value={rating}
         onChange={(e) => setRating(e.target.value)}
         required
-        InputProps={{ style: { color: 'white' } }} // Cambiar color del texto a blanco
-        InputLabelProps={{ style: { color: 'white' } }} // Cambiar color de la etiqueta a blanco
+        InputProps={{ style: { color: 'black' } }} // Cambiar color del texto a blanco
+        InputLabelProps={{ style: { color: 'gray' } }} // Cambiar color de la etiqueta a blanco
       />
       <TextField
         label="Review Text"
@@ -97,8 +97,8 @@ const ReviewForm = () => {
         value={text}
         onChange={(e) => setText(e.target.value)}
         required
-        InputProps={{ style: { color: 'white' } }} // Cambiar color del texto a blanco
-        InputLabelProps={{ style: { color: 'white' } }} // Cambiar color de la etiqueta a blanco
+        InputProps={{ style: { color: 'black' } }} // Cambiar color del texto a blanco
+        InputLabelProps={{ style: { color: 'gray' } }} // Cambiar color de la etiqueta a blanco
       />
       {error && <p style={{ color: 'red' }}>{error}</p>}
       <Button type="submit" variant="contained" color="primary" disabled={isSubmitting}>

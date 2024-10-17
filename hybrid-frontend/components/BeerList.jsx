@@ -60,7 +60,7 @@ const BeerList = () => {
             <Text style={styles.description}>{item.description}</Text>
             <View style={styles.buttonContainer}>
               <Button title="View Reviews" onPress={() => navigation.navigate('BeerReviews', { beerId: item.id })} />
-              <Button title="Add Review" onPress={() => navigation.navigate('AddReview', { beerId: item.id })} />
+              <Button title="Add Review" onPress={() => navigation.navigate('ReviewForm', { beerId: item.id })} />
               <Button title="See Details" onPress={() => navigation.navigate('BeerDetail', { beerId: item.id })} />
             </View>
           </View>

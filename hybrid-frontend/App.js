@@ -12,6 +12,7 @@ import Map from './components/Map';
 import BeerList from './components/BeerList';
 import BeerReviews from './components/BeerReviews'; // Asegúrate de que la ruta sea correcta
 import BeerDetail from './components/BeerDetail';
+import ReviewForm from './components/ReviewForm';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -40,6 +41,7 @@ const App = () => {
       <Stack.Screen name="BeerList" component={BeerList} />
       <Stack.Screen name="BeerReviews" component={BeerReviews} />
       <Stack.Screen name="BeerDetail" component={BeerDetail} />
+      <Stack.Screen name="ReviewForm" component={ReviewForm} />
     </Stack.Navigator>
   );
 

@@ -92,7 +92,7 @@ const BeerDetail = () => {
       <Text style={styles.detail}>Alcohol: {beer.alcohol}</Text>
       <Text style={styles.detail}>Average Rating: {beer.avg_rating !== null ? beer.avg_rating : 'No rating available'}</Text>
 
-      <Button title="Add Review" onPress={() => navigation.navigate('AddReview', { beerId })} />
+      <Button title="Add Review" onPress={() => navigation.navigate('ReviewForm', { beerId })} />
 
       <Text style={styles.reviewTitle}>Review</Text>
 
