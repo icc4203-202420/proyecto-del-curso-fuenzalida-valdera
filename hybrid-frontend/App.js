@@ -11,7 +11,7 @@ import Register from './components/Register';
 import Map from './components/Map';
 import BeerList from './components/BeerList';
 import BeerReviews from './components/BeerReviews'; // Asegúrate de que la ruta sea correcta
-import BeerDetail from './components/Beer/BeerDetail';
+import BeerDetail from './components/BeerDetail';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -39,6 +39,7 @@ const App = () => {
     <Stack.Navigator>
       <Stack.Screen name="BeerList" component={BeerList} />
       <Stack.Screen name="BeerReviews" component={BeerReviews} />
+      <Stack.Screen name="BeerDetail" component={BeerDetail} />
     </Stack.Navigator>
   );
 

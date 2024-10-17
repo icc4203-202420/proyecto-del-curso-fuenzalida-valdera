@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: '#121212',
+    backgroundColor: '#505050',
   },
   title: {
     fontSize: 24,
@@ -156,7 +156,7 @@ const styles = StyleSheet.create({
   },
   reviewCard: {
     padding: 16,
-    backgroundColor: '#1e1e1e',
+    backgroundColor: '#d0d0d0',
     borderRadius: 8,
     marginVertical: 10,
   },
