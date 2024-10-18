@@ -23,6 +23,7 @@ Rails.application.routes.draw do
     namespace :v1 do
       resources :bars do
         resources :events, only: [:index, :show, :create, :update, :destroy] do
+          resources :event_pictures, only: [:create]
           post 'check_in', on: :member
         end
       end
