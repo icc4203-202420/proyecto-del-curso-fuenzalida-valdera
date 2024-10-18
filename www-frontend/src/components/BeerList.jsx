@@ -1,31 +1,44 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { TextField, Card, CardContent, CardActions, Typography, IconButton, Button, Grid, Rating } from '@mui/material';
-import BeerIcon from '@mui/icons-material/LocalBar';
+import React, { useEffect, useState } from 'react'
+import axios from 'axios'
+import { TextField, Card, CardContent, CardActions, Typography, Button, Grid, Rating, CircularProgress } from '@mui/material'
+import BeerIcon from '@mui/icons-material/LocalBar'
+import { Link } from 'react-router-dom'
 
 const BeerList = () => {
-  const [beers, setBeers] = useState([]);
-  const [search, setSearch] = useState('');
-  const [filteredBeers, setFilteredBeers] = useState([]);
+  const [beers, setBeers] = useState([])
+  const [search, setSearch] = useState('')
+  const [filteredBeers, setFilteredBeers] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
 
   useEffect(() => {
-    const exampleBeers = [
-      {
-        id: 1,
-        name: 'Golden Ale',
-        rating: 4,
-        description: 'A refreshing golden ale with a hint of citrus and a crisp finish.'
+    const fetchBeers = async () => {
+      try {
+        const response = await axios.get('http://localhost:3001/api/v1/beers')
+        setBeers(response.data.beers)
+        setFilteredBeers(response.data.beers)
+      } catch (err) {
+        setError('Failed to load beers')
+      } finally {
+        setLoading(false)
       }
-    ];
-    setBeers(exampleBeers);
-    setFilteredBeers(exampleBeers);
-  }, []);
+    }
+
+    fetchBeers()
+  }, [])
 
   useEffect(() => {
     setFilteredBeers(
       beers.filter(beer => beer.name.toLowerCase().includes(search.toLowerCase()))
-    );
-  }, [search, beers]);
+    )
+  }, [search, beers])
+
+  if (loading) return <CircularProgress />
+  if (error) return <Typography color="error">{error}</Typography>
+
+  if (!Array.isArray(filteredBeers)) {
+    return <Typography color="error">Unexpected data format</Typography>
+  }
 
   return (
     <div>
@@ -50,7 +63,7 @@ const BeerList = () => {
                 </Typography>
                 <Rating
                   name="read-only"
-                  value={beer.rating}
+                  value={beer.avg_rating}
                   readOnly
                   style={{ marginBottom: '8px' }}
                 />
@@ -58,16 +71,29 @@ const BeerList = () => {
                   {beer.description}
                 </Typography>
               </CardContent>
-              <CardActions>
-                <Button size="small" variant="outlined">View Reviews</Button>
-                <Button size="small" variant="outlined">Add Review</Button>
+              <CardActions style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                <Button size="small" variant="outlined">
+                  <Link to={`/beers/${beer.id}/reviews`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                    View Reviews
+                  </Link>
+                </Button>
+                <Button size="small" variant="outlined">
+                  <Link to={`/beers/${beer.id}/add-review`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                    Add Review
+                  </Link>
+                </Button>
+                <Button size="small" variant="contained" style={{ marginTop: '8px' }}>
+                  <Link to={`/beers/${beer.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                    See Details
+                  </Link>
+                </Button>
               </CardActions>
             </Card>
           </Grid>
         ))}
       </Grid>
     </div>
-  );
-};
+  )
+}
 
-export default BeerList;
+export default BeerList
