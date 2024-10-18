@@ -53,6 +53,7 @@ const BeerList = () => {
             <Text style={styles.beerName}>{item.name}</Text>
             <Rating
               imageSize={20}
+              fractions={2}
               readonly
               startingValue={item.avg_rating}
               style={styles.rating}

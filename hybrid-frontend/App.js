@@ -10,7 +10,7 @@ import Login from './components/Login';
 import Register from './components/Register';
 import Map from './components/Map';
 import BeerList from './components/BeerList';
-import BeerReviews from './components/BeerReviews'; // Asegúrate de que la ruta sea correcta
+import BeerReviews from './components/BeerReviews';
 import BeerDetail from './components/BeerDetail';
 import ReviewForm from './components/ReviewForm';
 
@@ -39,8 +39,8 @@ const App = () => {
   const BeerStack = () => (
     <Stack.Navigator>
       <Stack.Screen name="BeerList" component={BeerList} />
-      <Stack.Screen name="BeerReviews" component={BeerReviews} />
       <Stack.Screen name="BeerDetail" component={BeerDetail} />
+      <Stack.Screen name="BeerReviews" component={BeerReviews} />
       <Stack.Screen name="ReviewForm" component={ReviewForm} />
     </Stack.Navigator>
   );
@@ -52,7 +52,12 @@ const App = () => {
           <Tab.Navigator>
             <Tab.Screen name="Map" component={Map} />
             {/* Usa BeerStack para manejar la navegación entre BeerList y BeerReviews */}
-            <Tab.Screen name="Beers" component={BeerStack} />
+            <Tab.Screen name="Beers" component={BeerStack} 
+            options={{
+              tabBarLabel: 'Beers',
+              headerShown: false,
+            }}
+            />
             <Tab.Screen 
               name="Logout" 
               component={() => null} // No necesitamos renderizar nada en esta pantalla
