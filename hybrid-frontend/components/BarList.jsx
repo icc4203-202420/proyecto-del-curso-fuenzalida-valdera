@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, FlatList, ActivityIndicator, TextInput } from 'react-native';
-import { Card, Title, Paragraph, Button, Text } from 'react-native-paper';
+import { View, StyleSheet, FlatList, ActivityIndicator, TextInput, Text } from 'react-native';
+import { Card, Title, Paragraph, Button } from 'react-native-paper';
 import axios from 'axios';
 import { useNavigation } from '@react-navigation/native';
 
@@ -31,6 +31,7 @@ const BarList = () => {
     fetchBars();
   }, []);
 
+  // Filter bars based on search input
   const filteredBars = bars.filter(bar =>
     bar.name.toLowerCase().includes(search.toLowerCase())
   );
@@ -60,8 +61,7 @@ const BarList = () => {
             </Card.Content>
             <Card.Actions>
               <Button
-                onPress={() => navigation.navigate('BarDetail', { barId: item.id })} // Cambia "BarDetails" al nombre de tu pantalla de detalles
-                mode="contained"
+                onPress={() => navigation.navigate('BarDetail', { id: item.id })} // Cambié barId a id para seguir el patrón de BarDetail
                 style={styles.button}
               >
                 See Details

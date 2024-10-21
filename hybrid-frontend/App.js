@@ -14,6 +14,8 @@ import BeerReviews from './components/BeerReviews';
 import BeerDetail from './components/BeerDetail';
 import ReviewForm from './components/ReviewForm';
 import BarList from './components/BarList';
+import BarDetail from './components/BarDetail';
+import EventBar from './components/EventBar';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -51,20 +53,40 @@ const App = () => {
     );
   }
 
+  const BeerStack = () => (
+    <Stack.Navigator>
+      <Stack.Screen name="BeerList" component={BeerList} />
+      <Stack.Screen name="BeerDetail" component={BeerDetail} />
+      <Stack.Screen name="BeerReviews" component={BeerReviews} />
+      <Stack.Screen name="ReviewForm" component={ReviewForm} />
+    </Stack.Navigator>
+  );
+
+  const BarStack = () => (
+    <Stack.Navigator>
+      <Stack.Screen name="BarList" component={BarList} />
+      <Stack.Screen name="BarDetail" component={BarDetail} />
+      <Stack.Screen name="EventBar" component={EventBar} />
+    </Stack.Navigator>
+  );
+
   return (
     <PaperProvider>
       <NavigationContainer>
         {isAuthenticated ? (
           <Tab.Navigator>
             <Tab.Screen name="Map" component={Map} />
-            {/* Usa BeerStack para manejar la navegación entre BeerList y BeerReviews */}
             <Tab.Screen name="Beers" component={BeerStack} 
             options={{
               tabBarLabel: 'Beers',
               headerShown: false,
             }}
             />
-            <Tab.Screen name="Bar" component={BarList} />
+            <Tab.Screen name="Bar" component={BarStack} 
+            options={{
+              tabBarLabel: 'Bars',
+              headerShown: false,
+            }}/>
             <Tab.Screen 
               name="Logout" 
               component={() => null} // No necesitamos renderizar nada en esta pantalla

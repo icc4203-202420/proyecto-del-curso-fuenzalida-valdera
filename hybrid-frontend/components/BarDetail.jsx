@@ -2,11 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, ActivityIndicator, ScrollView } from 'react-native';
 import { Card, Title, Paragraph, Button, Text } from 'react-native-paper';
 import axios from 'axios';
-import { useRoute } from '@react-navigation/native';
+import { useRoute, useNavigation } from '@react-navigation/native';
 
 const BarDetail = () => {
   const route = useRoute();
-  const { id } = route.params; // ObtÃ©n el ID de la ruta
+  const navigation = useNavigation();
+  const { id } = route.params; // Obtén el ID de la ruta
   const [bar, setBar] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -49,7 +50,7 @@ const BarDetail = () => {
           {bar.events && bar.events.length > 0 && (
             <Button
               mode="contained"
-              onPress={() => {/* Navigate to events screen (implement the navigation) */}}
+              onPress={() => navigation.navigate('EventBar', { id })} // Navega a EventBar
               style={styles.button}
             >
               View Events
