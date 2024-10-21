@@ -4,7 +4,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Provider as PaperProvider } from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { View, StyleSheet, Text } from 'react-native';
+import { View, StyleSheet, Text, ActivityIndicator } from 'react-native'; // Add ActivityIndicator here
 import Home from './components/Home'; 
 import Login from './components/Login';
 import Register from './components/Register';
@@ -13,37 +13,43 @@ import BeerList from './components/BeerList';
 import BeerReviews from './components/BeerReviews';
 import BeerDetail from './components/BeerDetail';
 import ReviewForm from './components/ReviewForm';
+import BarList from './components/BarList';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(true); // Estado de carga
 
-  // Verifica si el usuario está autenticado al cargar la app
   useEffect(() => {
     const checkAuth = async () => {
-      const token = await AsyncStorage.getItem('jwtToken');
-      setIsAuthenticated(!!token); // Si hay token, el usuario está autenticado
+      try {
+        const token = await SecureStore.getItemAsync('jwtToken');
+        setIsAuthenticated(!!token);  // Si no hay token, isAuthenticated será false
+      } catch (error) {
+        console.error('Error fetching token', error);
+        setIsAuthenticated(false);  // Si ocurre algún error, desautentica
+      } finally {
+        setLoading(false);  // Termina la verificación, sea cual sea el resultado
+      }
     };
     checkAuth();
   }, []);
 
-  // Lógica de logout
   const handleLogout = async () => {
-    await AsyncStorage.removeItem('jwtToken'); // Elimina el token de autenticación
-    setIsAuthenticated(false); // Cambia el estado para indicar que el usuario no está autenticado
+    await SecureStore.deleteItemAsync('jwtToken');
+    setIsAuthenticated(false);
   };
 
-  // Crear un stack separado para BeerList y BeerReviews
-  const BeerStack = () => (
-    <Stack.Navigator>
-      <Stack.Screen name="BeerList" component={BeerList} />
-      <Stack.Screen name="BeerDetail" component={BeerDetail} />
-      <Stack.Screen name="BeerReviews" component={BeerReviews} />
-      <Stack.Screen name="ReviewForm" component={ReviewForm} />
-    </Stack.Navigator>
-  );
+  if (loading) {
+    // Muestra un indicador de carga mientras se verifica el token
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    );
+  }
 
   return (
     <PaperProvider>
@@ -58,6 +64,7 @@ const App = () => {
               headerShown: false,
             }}
             />
+            <Tab.Screen name="Bar" component={BarList} />
             <Tab.Screen 
               name="Logout" 
               component={() => null} // No necesitamos renderizar nada en esta pantalla

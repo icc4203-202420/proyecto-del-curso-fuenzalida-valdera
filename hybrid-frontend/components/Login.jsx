@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native'
+import * as SecureStore from 'expo-secure-store';
 
 const Login = ({ setIsAuthenticated, navigation }) => {
   const [email, setEmail] = useState('')
@@ -8,9 +9,9 @@ const Login = ({ setIsAuthenticated, navigation }) => {
 
   const handleLoginSuccess = (data) => {
     const token = data.status.data.token
-    const userId = data.status.data.user.id // Obtén el ID del usuario de la respuesta
-    sessionStorage.setItem('jwtToken', token) // Almacena el token en sessionStorage
-    sessionStorage.setItem('userId', userId) // Almacena el ID del usuario en sessionStorage
+    const userId = data.status.data.user.id; // ObtÃ©n el ID del usuario de la respuesta
+    SecureStore.setItemAsync('jwtToken', token); // Almacena el token en sessionStorage
+    SecureStore.setItemAsync('userId', userId) // Almacena el ID del usuario en sessionStorage
     setIsAuthenticated(true)
     navigation.navigate('Map') // Redirige al mapa tras login exitoso
   }
