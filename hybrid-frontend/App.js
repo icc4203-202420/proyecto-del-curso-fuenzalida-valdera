@@ -16,6 +16,7 @@ import ReviewForm from './components/ReviewForm';
 import BarList from './components/BarList';
 import BarDetail from './components/BarDetail';
 import EventBar from './components/EventBar';
+import UserSearch from './components/UserSearch';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -85,6 +86,11 @@ const App = () => {
             <Tab.Screen name="Bar" component={BarStack} 
             options={{
               tabBarLabel: 'Bars',
+              headerShown: false,
+            }}/>
+            <Tab.Screen name="UserSearch" component={UserSearch} 
+            options={{
+              tabBarLabel: 'Search Users',
               headerShown: false,
             }}/>
             <Tab.Screen 
