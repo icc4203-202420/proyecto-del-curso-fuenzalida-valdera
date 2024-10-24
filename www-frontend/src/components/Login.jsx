@@ -1,116 +1,150 @@
 import React, { useState } from 'react'
-import { Formik, Form, Field, ErrorMessage } from 'formik'
-import * as Yup from 'yup'
-import axios from 'axios'
-import { TextField, Button, Typography, Container, Paper } from '@mui/material'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 
-const validationSchema = Yup.object({
-  email: Yup.string().email('Invalid email').required('Email is required'),
-  password: Yup.string().required('Password is required').min(6, 'Password must be at least 6 characters'),
-})
-
-const initialValues = {
-  email: '',
-  password: '',
-}
-
-const Login = () => {
-  const [serverError, setServerError] = useState('')
+const Login = ({ setIsAuthenticated }) => {
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState(null)
   const navigate = useNavigate()
 
-  const handleSubmit = async (values, { setSubmitting }) => {
+  const handleLoginSuccess = (data) => {
+    const token = data.status.data.token
+    const userId = data.status.data.user.id // Obtén el ID del usuario de la respuesta
+    sessionStorage.setItem('jwtToken', token) // Almacena el token en sessionStorage
+    sessionStorage.setItem('userId', userId)  // Almacena el ID del usuario en sessionStorage
+    setIsAuthenticated(true)
+    navigate('/map') // Redirige al mapa tras login exitoso
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setError(null)
+
     try {
-      const response = await axios.post('http://localhost:3001/api/v1/login', {
-        user: values
+      const response = await fetch('http://localhost:3001/api/v1/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          user: {
+            email: email,
+            password: password,
+          },
+        }),
       })
-      
-      if (response.status === 200) {
-        const receivedToken = response.data.token
-        sessionStorage.setItem('jwtToken', receivedToken)
-        setServerError('')
-        const storedToken = sessionStorage.getItem('jwtToken')
-        if (storedToken) {
-          navigate('/map')
-          window.location.reload()
-        } else {
-          console.error('Token not stored in sessionStorage')
-        }
-      }
-      
-    } catch (err) {
-      if (err.response && err.response.status === 401) {
-        setServerError('Incorrect password or email')
+
+      if (response.ok) {
+        const data = await response.json()
+        handleLoginSuccess(data)
       } else {
-        setServerError('Server error. Please try again later or refresh the page.')
+        const errorData = await response.json()
+        setError(errorData.message || 'Login failed') // Manejo de error
       }
-      console.error('Form submit error:', err)
-    } finally {
-      setSubmitting(false)
+    } catch (error) {
+      setError('An error occurred. Please try again.') // Error en caso de fallo de red
     }
-  }  
+  }
 
   return (
-    <Container component={Paper} maxWidth="xs" style={{ padding: '2rem', marginTop: '2rem', backgroundColor: '#fff' }}>
-      <Typography variant="h5" align="center" gutterBottom>Login</Typography>
-      <Formik
-        initialValues={initialValues}
-        validationSchema={validationSchema}
-        onSubmit={handleSubmit}
-      >
-        {({ isSubmitting }) => (
-          <Form>
-            <Field
-              name="email"
-              as={TextField}
-              label="Email"
-              type="email"
-              fullWidth
-              margin="normal"
-              variant="outlined"
-              helperText={<ErrorMessage name="email" />}
-              error={Boolean(<ErrorMessage name="email" />)}
-            />
-            <Field
-              name="password"
-              as={TextField}
-              label="Password"
-              type="password"
-              fullWidth
-              margin="normal"
-              variant="outlined"
-              helperText={<ErrorMessage name="password" />}
-              error={Boolean(<ErrorMessage name="password" />)}
-            />
-            <Button
-              type="submit"
-              variant="contained"
-              color="primary"
-              fullWidth
-              disabled={isSubmitting}
-              style={{ marginTop: '1rem' }}
-            >
-              {isSubmitting ? 'Loading...' : 'Login'}
-            </Button>
-            {serverError && (
-              <Typography color="error" align="center" style={{ marginTop: '1rem' }}>
-                {serverError}
-              </Typography>
-            )}
-            <Button
-              variant="contained"
-              color="primary"
-              fullWidth
-              style={{ marginTop: '1rem' }}
-              onClick={() => navigate('/register')}
-            >
-              Register
-            </Button>
-          </Form>
-        )}
-      </Formik>
-    </Container>
+    <div style={styles.container}>
+      <h2 style={styles.title}>Login</h2>
+      {error && <p style={styles.error}>{error}</p>} {/* Muestra error si existe */}
+      <form onSubmit={handleSubmit} style={styles.form}>
+        <div style={styles.inputGroup}>
+          <label style={styles.label}>Email:</label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            style={styles.input}
+          />
+        </div>
+        <div style={styles.inputGroup}>
+          <label style={styles.label}>Password:</label>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            style={styles.input}
+          />
+        </div>
+        <button type="submit" style={styles.button}>Login</button>
+      </form>
+      <p style={styles.registerText}>Don't have an account yet? 
+        <button 
+          onClick={() => navigate('/register')} 
+          style={styles.registerButton}>
+          Register
+        </button>
+      </p>
+    </div>
   )
+}
+
+const styles = {
+  container: {
+    maxWidth: '400px',
+    margin: '0 auto',
+    padding: '20px',
+    border: '1px solid #ccc',
+    borderRadius: '8px',
+    boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
+    backgroundColor: '#343a40',
+    color: '#ffffff',
+  },
+  title: {
+    textAlign: 'center',
+    marginBottom: '20px',
+  },
+  error: {
+    color: 'red',
+    textAlign: 'center',
+  },
+  form: {
+    display: 'flex',
+    flexDirection: 'column',
+  },
+  inputGroup: {
+    marginBottom: '15px',
+  },
+  label: {
+    marginBottom: '5px',
+    fontWeight: 'bold',
+    color: '#ffffff',
+  },
+  input: {
+    padding: '10px',
+    border: '1px solid #ccc',
+    borderRadius: '4px',
+    width: '100%',
+    boxSizing: 'border-box',
+    backgroundColor: '#495057',
+    color: '#ffffff',
+  },
+  button: {
+    padding: '10px',
+    border: 'none',
+    borderRadius: '4px',
+    backgroundColor: '#007bff',
+    color: '#fff',
+    cursor: 'pointer',
+    transition: 'background-color 0.3s',
+  },
+  registerText: {
+    textAlign: 'center',
+    marginTop: '15px',
+  },
+  registerButton: {
+    marginLeft: '5px',
+    background: 'none',
+    border: 'none',
+    color: '#007bff',
+    cursor: 'pointer',
+    textDecoration: 'underline',
+  },
 }
 
 export default Login

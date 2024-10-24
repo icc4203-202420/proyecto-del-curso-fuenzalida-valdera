@@ -26,6 +26,7 @@ const App = () => {
   const navigate = useNavigate()
   const location = useLocation()
 
+  // Check for authentication on mount
   useEffect(() => {
     const token = sessionStorage.getItem('jwtToken')
     setIsAuthenticated(!!token)
@@ -94,15 +95,11 @@ const App = () => {
               <ListItemIcon><LocalBarIcon style={{ color: 'black' }} /></ListItemIcon>
               <ListItemText primary="Bars" />
             </ListItem>
-            <ListItem button component={Link} to="/bars" onClick={toggleDrawer(false)} style={{color: 'black'}}>
-              <ListItemIcon><EventIcon style={{ color: 'black' }} /></ListItemIcon>
-              <ListItemText primary="Events" />
-            </ListItem>
             <ListItem button component={Link} to="/search" onClick={toggleDrawer(false)} style={{color: 'black'}}>
               <ListItemIcon><SearchIcon style={{ color: 'black' }} /></ListItemIcon>
               <ListItemText primary="Search Users" />
             </ListItem>
-            <ListItem button onClick={() => { handleLogout(); toggleDrawer(false); }} style={{color: 'black'}}>
+            <ListItem button onClick={() => { handleLogout(); toggleDrawer(false) }} style={{color: 'black'}}>
               <ListItemIcon><LogoutIcon style={{ color: 'black' }} /></ListItemIcon>
               <ListItemText primary="Logout" />
             </ListItem>

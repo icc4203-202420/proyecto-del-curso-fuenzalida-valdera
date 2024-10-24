@@ -1,13 +1,18 @@
 class API::V1::UsersController < ApplicationController
   respond_to :json
-  before_action :set_user, only: [:show, :update] 
-  before_action :authenticate_user!, only: [:create, :update, :destroy, :friendships, :create_friendship]
-  
+  before_action :set_user, only: [:show, :update]
+  before_action :authenticate_user!, only: [:create, :update]
+
   def index
-    @users = User.includes(:reviews, :address).all   
+    if params[:handle]
+      @users = User.where("LOWER(handle) LIKE ?", "%#{params[:handle].downcase}%")
+      render json: @users
+    else
+      render json: { error: 'Handle not provided' }, status: :bad_request
+    end
   end
 
-  def show ; end
+  def show; end
 
   def create
     @user = User.new(user_params)
@@ -19,7 +24,6 @@ class API::V1::UsersController < ApplicationController
   end
 
   def update
-    #byebug
     if @user.update(user_params)
       render :show, status: :ok, location: api_v1_users_path(@user)
     else
@@ -27,25 +31,25 @@ class API::V1::UsersController < ApplicationController
     end
   end
 
-  def friendships
-    @friendships = @user.friendships.include(:friend)
-    friends = @friendships.map(&:friend)
-    render json: friends, status: :ok
-  end
-
   def create_friendship
-    friend = User.find_by(id: params[:friend_id])
+    user = User.find(params[:id])
+    friend = User.find_by(id: params[:friend_id]) # Cambiado a friend_id
 
-    if friend.nil?
-      render json: { error: "Couldn't find friend"}, status: :not_found
-      return
+    return render json: { error: 'Friend not found' }, status: :not_found unless friend
+
+    existing_friendship = user.friendships.find_by(friend_id: friend.id)
+    if existing_friendship
+      return render json: { error: 'Friendship already exists' }, status: :unprocessable_entity
     end
 
-    @friendship = @user.friendships.build(friend: friend, bar_id: params[:bar_id])
-    if @friendship.save
-      render json: @friendship, status: :created
+    bar = Bar.find_by(id: params[:bar_id]) if params[:bar_id]
+
+    friendship = user.friendships.build(friend: friend, bar: bar)
+
+    if friendship.save
+      render json: friendship, status: :created
     else
-      render json: @friendship.errors, status: :unprocessable_entity
+      render json: friendship.errors, status: :unprocessable_entity
     end
   end
 
@@ -56,11 +60,12 @@ class API::V1::UsersController < ApplicationController
   end
 
   def user_params
-    params.fetch(:user, {}).
-        permit(:id, :first_name, :last_name, :email, :age,
-            { address_attributes: [:id, :line1, :line2, :city, :country, :country_id, 
-              country_attributes: [:id, :name]],
-              reviews_attributes: [:id, :text, :rating, :beer_id, :_destroy]
-            })
+    params.fetch(:user, {}).permit(
+      :id, :first_name, :last_name, :email, :age,
+      { address_attributes: [:id, :line1, :line2, :city, :country, :country_id,
+        country_attributes: [:id, :name]],
+        reviews_attributes: [:id, :text, :rating, :beer_id, :_destroy]
+      }
+    )
   end
 end
