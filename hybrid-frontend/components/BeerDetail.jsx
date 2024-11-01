@@ -2,6 +2,7 @@ import React, { useEffect, useReducer, useState } from 'react';
 import { View, Text, ActivityIndicator, Button, FlatList, StyleSheet } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import axios from 'axios';
+import { backend_url } from '@env'
 
 const reviewsReducer = (state, action) => {
   switch (action.type) {
@@ -41,7 +42,7 @@ const BeerDetail = () => {
   useEffect(() => {
     const fetchBeer = async () => {
       try {
-        const response = await fetch(`http://localhost:3001/api/v1/beers/${beerId}`);
+        const response = await fetch(`${backend_url}/api/v1/beers/${beerId}`);
         if (response.ok) {
           const data = await response.json();
           setBeer(data);

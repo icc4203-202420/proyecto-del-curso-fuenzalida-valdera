@@ -17,25 +17,26 @@ import ReviewForm from './components/ReviewForm';
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
+// Componente vacío para la pantalla "Logout"
+const EmptyScreen = () => <Text>Logging out...</Text>;
+
+
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // Verifica si el usuario está autenticado al cargar la app
   useEffect(() => {
     const checkAuth = async () => {
       const token = await AsyncStorage.getItem('jwtToken');
-      setIsAuthenticated(!!token); // Si hay token, el usuario está autenticado
+      setIsAuthenticated(!!token);
     };
     checkAuth();
   }, []);
 
-  // Lógica de logout
   const handleLogout = async () => {
-    await AsyncStorage.removeItem('jwtToken'); // Elimina el token de autenticación
-    setIsAuthenticated(false); // Cambia el estado para indicar que el usuario no está autenticado
+    await AsyncStorage.removeItem('jwtToken');
+    setIsAuthenticated(false);
   };
 
-  // Crear un stack separado para BeerList y BeerReviews
   const BeerStack = () => (
     <Stack.Navigator>
       <Stack.Screen name="BeerList" component={BeerList} />
@@ -51,30 +52,32 @@ const App = () => {
         {isAuthenticated ? (
           <Tab.Navigator>
             <Tab.Screen name="Map" component={Map} />
-            {/* Usa BeerStack para manejar la navegación entre BeerList y BeerReviews */}
-            <Tab.Screen name="Beers" component={BeerStack} 
-            options={{
-              tabBarLabel: 'Beers',
-              headerShown: false,
-            }}
-            />
-            <Tab.Screen 
-              name="Logout" 
-              component={() => null} // No necesitamos renderizar nada en esta pantalla
+            <Tab.Screen
+              name="Beers"
+              component={BeerStack}
               options={{
-                tabBarButton: (props) => (
-                  <LogoutButton {...props} onLogout={handleLogout} />
-                )
+                tabBarLabel: 'Beers',
+                headerShown: false,
               }}
             />
+            <Tab.Screen
+              name="Logout"
+              component={EmptyScreen}
+              options={{
+                tabBarButton: () => (
+                  <Text onPress={handleLogout} style={{ color: 'red', padding: 10 }}>Logout</Text>
+                ),
+              }}
+            />
+
           </Tab.Navigator>
         ) : (
           <Stack.Navigator>
             <Stack.Screen name="Login">
-              {props => <Login {...props} setIsAuthenticated={setIsAuthenticated} />}
+              {(props) => <Login {...props} setIsAuthenticated={setIsAuthenticated} />}
             </Stack.Screen>
             <Stack.Screen name="Register">
-              {props => <Register {...props} setIsAuthenticated={setIsAuthenticated} />}
+              {(props) => <Register {...props} setIsAuthenticated={setIsAuthenticated} />}
             </Stack.Screen>
           </Stack.Navigator>
         )}
@@ -83,11 +86,12 @@ const App = () => {
   );
 };
 
-// Botón personalizado para hacer logout desde la pestaña
 const LogoutButton = ({ onLogout }) => {
   return (
     <View style={styles.logoutButton}>
-      <Text onPress={onLogout} style={styles.logoutText}>Logout</Text>
+      <Text onPress={onLogout} style={styles.logoutText}>
+        Logout
+      </Text>
     </View>
   );
 };
@@ -95,7 +99,7 @@ const LogoutButton = ({ onLogout }) => {
 const styles = StyleSheet.create({
   logoutButton: {
     padding: 10,
-    backgroundColor: '#FF5733', // Cambia el color según tu preferencia
+    backgroundColor: '#FF5733',
     borderRadius: 5,
   },
   logoutText: {

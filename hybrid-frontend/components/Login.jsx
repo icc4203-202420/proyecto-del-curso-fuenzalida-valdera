@@ -1,25 +1,32 @@
 import React, { useState } from 'react'
 import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native'
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import { backend_url } from '@env'
 
 const Login = ({ setIsAuthenticated, navigation }) => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState(null)
 
-  const handleLoginSuccess = (data) => {
+  const handleLoginSuccess = async (data) => {
     const token = data.status.data.token
-    const userId = data.status.data.user.id // Obtén el ID del usuario de la respuesta
-    sessionStorage.setItem('jwtToken', token) // Almacena el token en sessionStorage
-    sessionStorage.setItem('userId', userId) // Almacena el ID del usuario en sessionStorage
-    setIsAuthenticated(true)
-    navigation.navigate('Map') // Redirige al mapa tras login exitoso
+    const userId = data.status.data.user.id
+
+    try {
+      await AsyncStorage.setItem('jwtToken', token)
+      await AsyncStorage.setItem('userId', userId.toString())
+      setIsAuthenticated(true)
+      navigation.navigate('Map')
+    } catch (e) {
+      console.error('Failed to save token or userId in AsyncStorage:', e)
+    }
   }
 
   const handleSubmit = async () => {
     setError(null)
 
     try {
-      const response = await fetch('http://localhost:3001/api/v1/login', {
+      const response = await fetch(`${backend_url}/api/v1/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -37,17 +44,19 @@ const Login = ({ setIsAuthenticated, navigation }) => {
         handleLoginSuccess(data)
       } else {
         const errorData = await response.json()
-        setError(errorData.message || 'Login failed') // Manejo de error
+        setError(errorData.message || 'Login failed')
       }
     } catch (error) {
-      setError('An error occurred. Please try again.') // Error en caso de fallo de red
+      setError('An error occurred. Please try again.')
     }
   }
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Login</Text>
-      {error && <Text style={styles.error}>{error}</Text>} {/* Muestra error si existe */}
+      {error && (
+        <Text style={styles.error}>{error}</Text>
+      )}
       <TextInput
         placeholder="Email"
         value={email}
@@ -55,7 +64,6 @@ const Login = ({ setIsAuthenticated, navigation }) => {
         keyboardType="email-address"
         style={styles.input}
         autoCapitalize="none"
-        required
       />
       <TextInput
         placeholder="Password"
@@ -63,31 +71,31 @@ const Login = ({ setIsAuthenticated, navigation }) => {
         onChangeText={setPassword}
         secureTextEntry
         style={styles.input}
-        required
       />
       <Button title="Login" onPress={handleSubmit} />
-      <Text style={styles.registerText}>
-        Don't have an account yet? 
+      <View style={styles.registerTextContainer}>
+        <Text style={styles.registerText}>
+          Don't have an account yet?{' '}
+        </Text>
         <Text 
           onPress={() => navigation.navigate('Register')} 
           style={styles.registerButton}>
           Register
         </Text>
-      </Text>
+      </View>
     </View>
   )
 }
 
 const styles = StyleSheet.create({
   container: {
-    maxWidth: '400px',
-    margin: '0 auto',
+    maxWidth: 400,
+    marginHorizontal: 'auto',
     padding: 20,
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 8,
     backgroundColor: '#343a40',
-    color: '#ffffff',
     flex: 1,
     justifyContent: 'center',
   },
@@ -112,13 +120,15 @@ const styles = StyleSheet.create({
     backgroundColor: '#495057',
     color: '#ffffff',
   },
-  registerText: {
-    textAlign: 'center',
+  registerTextContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
     marginTop: 15,
+  },
+  registerText: {
     color: '#ffffff',
   },
   registerButton: {
-    marginLeft: 5,
     color: '#007bff',
     textDecorationLine: 'underline',
   },

@@ -1,5 +1,5 @@
-import React from 'react'
-import { View, Text, Button, StyleSheet } from 'react-native'
+import React from 'react';
+import { View, Text, Button, StyleSheet } from 'react-native';
 
 const Home = ({ navigation }) => {
   return (
@@ -8,20 +8,20 @@ const Home = ({ navigation }) => {
       <Button title="Login" onPress={() => navigation.navigate('Login')} />
       <Button title="Register" onPress={() => navigation.navigate('Register')} />
     </View>
-  )
-}
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#FFEB3B', // Puedes cambiar el color de fondo si lo deseas
+    backgroundColor: '#FFEB3B',
   },
   title: {
     fontSize: 24,
     marginBottom: 20,
   },
-})
+});
 
-export default Home
+export default Home;
