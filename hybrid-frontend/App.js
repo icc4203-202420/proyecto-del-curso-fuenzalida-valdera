@@ -104,6 +104,9 @@ const App = () => {
           </Tab.Navigator>
         ) : (
           <Stack.Navigator>
+            <Stack.Screen name="Feed" component={Feed} />
+            <Stack.Screen name="EventBar" component={EventBar} />
+            <Stack.Screen name="BeerDetail" component={BeerDetail} />
             <Stack.Screen name="Login">
               {props => <Login {...props} setIsAuthenticated={setIsAuthenticated} />}
             </Stack.Screen>

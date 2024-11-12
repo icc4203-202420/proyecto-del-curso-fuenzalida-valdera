@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, Button, ActivityIndicator, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Button, ActivityIndicator, Image, TouchableOpacity } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 import { backend_url } from '@env';
+import { useNavigation } from '@react-navigation/native';
 
 const Feed = () => {
   const [feed, setFeed] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState(null);
+  const navigation = useNavigation();
 
   useEffect(() => {
     const fetchFeed = async () => {
@@ -51,22 +53,22 @@ const Feed = () => {
           <View key={index} style={styles.post}>
             {/* Mostrar publicaciones de eventos */}
             {post.type === 'event_picture' && (
-              <>
+              <TouchableOpacity onPress={() => navigation.navigate('EventBar', { eventId: post.event_id })}>
                 <Text style={styles.title}>{post.event_name || 'No Name Assigned'}</Text>
                 <Image source={{ uri: post.image_url }} style={styles.image} />
                 <Text>{post.description}</Text>
                 <Text style={styles.date}>Date: {date}</Text>
-              </>
+              </TouchableOpacity>
             )}
 
             {/* Mostrar reviews de cervezas */}
             {post.type === 'beer_review' && (
-              <>
+              <TouchableOpacity onPress={() => navigation.navigate('BeerDetail', { beerId: post.beer_id })}>
                 <Text style={styles.title}>{post.beer_name || 'No Beer Name'}</Text>
                 <Text style={styles.rating}>Rating: {post.rating}</Text>
                 <Text>{post.review_text}</Text>
                 <Text style={styles.date}>Date: {date}</Text>
-              </>
+              </TouchableOpacity>
             )}
           </View>
         );
