@@ -1,7 +1,8 @@
 class API::V1::FeedController < ApplicationController
   def index
     event_pictures = EventPicture.includes(:event, :user).order(created_at: :desc)
-    events = Event.order(start_date: :desc)
+
+    reviews = Review.includes(:user, :beer).order(created_at: :desc)
 
     feed = event_pictures.map do |event_picture|
       {
@@ -13,7 +14,18 @@ class API::V1::FeedController < ApplicationController
       }
     end
 
-    #feed = (feed + events).sort_by(&:created_at).reverse
+    reviews.each do |review|
+      feed.push({
+        type: 'beer_review',  # Para identificar que es una review de cerveza
+        beer_name: review.beer.name,  # Nombre de la cerveza
+        rating: review.rating,  # Calificación de la cerveza
+        review_text: review.text,  # Texto de la review
+        created_at: review.created_at.iso8601,  # Fecha de la review
+        user_name: review.user.handle  # Nombre del usuario que escribió la review
+      })
+    end
+
+    feed.sort_by! { |post| post[:created_at] }.reverse!
 
     render json: feed
   end

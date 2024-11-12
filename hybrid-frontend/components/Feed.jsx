@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, Button, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Button, ActivityIndicator, Image } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 import { backend_url } from '@env';
 
@@ -42,15 +42,32 @@ const Feed = () => {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Button title="Filter" onPress={() => setFilter(/* filter logic here */)} />
+      <Button title="Filter" onPress={() => setFilter(/* filter logic here, yep, not done yet haha */)} />
       {filteredFeed.map((post, index) => {
         const formattedDate = new Date(post.created_at);
         const date = isNaN(formattedDate) ? 'Invalid Date' : formattedDate.toLocaleString();
+
         return (
           <View key={index} style={styles.post}>
-            <Text style={styles.title}>{post.event_name || 'Event'}</Text>
-            <Text>{post.description}</Text>
-            <Text style={styles.date}>Date: {date}</Text>
+            {/* Mostrar publicaciones de eventos */}
+            {post.type === 'event_picture' && (
+              <>
+                <Text style={styles.title}>{post.event_name || 'No Name Assigned'}</Text>
+                <Image source={{ uri: post.image_url }} style={styles.image} />
+                <Text>{post.description}</Text>
+                <Text style={styles.date}>Date: {date}</Text>
+              </>
+            )}
+
+            {/* Mostrar reviews de cervezas */}
+            {post.type === 'beer_review' && (
+              <>
+                <Text style={styles.title}>{post.beer_name || 'No Beer Name'}</Text>
+                <Text style={styles.rating}>Rating: {post.rating}</Text>
+                <Text>{post.review_text}</Text>
+                <Text style={styles.date}>Date: {date}</Text>
+              </>
+            )}
           </View>
         );
       })}
@@ -62,6 +79,8 @@ const styles = StyleSheet.create({
   container: { padding: 10 },
   post: { marginBottom: 15, padding: 10, backgroundColor: '#f0f0f0', borderRadius: 5 },
   title: { fontSize: 18, fontWeight: 'bold' },
+  image: { width: '100%', height: 200, borderRadius: 5, marginBottom: 10 },
+  rating: { color: '#ff9900', fontWeight: 'bold' },
   date: { color: '#888', marginTop: 5 },
 });
 
