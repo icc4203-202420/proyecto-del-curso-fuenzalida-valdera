@@ -6,6 +6,7 @@ class API::V1::FeedController < ApplicationController
 
     feed = event_pictures.map do |event_picture|
       {
+        type: 'event_picture',
         image_url: url_for(event_picture.image),  # URL de la imagen almacenada en ActiveStorage
         description: event_picture.description,   # Descripción de la imagen
         created_at: event_picture.created_at.iso8601,    # Fecha de creación
