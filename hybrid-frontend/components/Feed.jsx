@@ -1,10 +1,10 @@
 import React from 'react'
 import { View, Text, StyleSheet } from 'react-native'
 
-const Map = () => {
+const Feed = () => {
   return (
     <View style={styles.container}>
-      <Text>No map available at the moment.</Text>
+      <Text>No Feed available at the moment.</Text>
     </View>
   )
 }
@@ -17,4 +17,4 @@ const styles = StyleSheet.create({
   },
 })
 
-export default Map;
+export default Feed;

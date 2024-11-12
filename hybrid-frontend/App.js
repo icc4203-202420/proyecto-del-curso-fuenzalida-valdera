@@ -8,7 +8,7 @@ import { View, StyleSheet, Text, ActivityIndicator } from 'react-native';
 import Home from './components/Home'; 
 import Login from './components/Login';
 import Register from './components/Register';
-import Map from './components/Map';
+import Feed from './components/Feed';
 import BeerList from './components/BeerList';
 import BeerReviews from './components/BeerReviews';
 import BeerDetail from './components/BeerDetail';
@@ -75,7 +75,7 @@ const App = () => {
       <NavigationContainer>
         {isAuthenticated ? (
           <Tab.Navigator>
-            <Tab.Screen name="Map" component={Map} />
+            <Tab.Screen name="Feed" component={Feed} />
             <Tab.Screen 
               name="Beers" 
               component={BeerStack} 
