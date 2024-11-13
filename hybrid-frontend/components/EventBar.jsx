@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Button, FlatList, Image, TextInput, ScrollView, TouchableOpacity, Platform } from 'react-native';
+import { View, Text, Button, FlatList, Image, TextInput, ScrollView, TouchableOpacity, Platform, StyleSheet } from 'react-native';
 import { Snackbar, Avatar } from 'react-native-paper';
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
@@ -12,7 +12,7 @@ import { Linking } from 'react-native';
 
 const EventBar = () => {
   const route = useRoute();
-  const { id: barId } = route.params;
+  const { id: barId, featured_event_id } = route.params;
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -56,7 +56,11 @@ const EventBar = () => {
 
     const fetchEvents = async () => {
       try {
-        const eventsResponse = await axios.get(`${backend_url}/api/v1/bars/${barId}/events`);
+        const eventsResponse = await axios.get(`${backend_url}/api/v1/bars/${barId}/events`, {
+          params: {
+            featured_event_id: featured_event_id
+          }
+        });
         setEvents(eventsResponse.data.events || []);
       } catch (err) {
         setError('Failed to load events');
@@ -211,7 +215,7 @@ const EventBar = () => {
   
       <FlatList
         data={events}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={(event) => event.id.toString()} // Cambié "item" por "event" aquí también
         renderItem={({ item: event }) => {
           const eventDate = new Date(event.date);
           const isEventPast = eventDate < new Date();
@@ -222,7 +226,18 @@ const EventBar = () => {
           }));
   
           return (
-            <View style={{ marginVertical: 8, borderWidth: 1, borderColor: '#ccc', borderRadius: 8, padding: 16 }}>
+            <View
+              style={[
+                {
+                  marginVertical: 8,
+                  borderWidth: 1,
+                  borderColor: '#ccc',
+                  borderRadius: 8,
+                  padding: 16,
+                },
+                event.id === featured_event_id && styles.featuredEvent,
+              ]}
+            >
               <Text style={{ fontSize: 18 }}>{event.name}</Text>
               <Text>{event.description}</Text>
               <Text>
@@ -253,23 +268,23 @@ const EventBar = () => {
                   <Button title="Select Image" onPress={handleSelectImage} />
                 </>
               )}
-{videoUrl && (
-  <View style={{ marginTop: 20 }}>
-    <Text style={{ fontSize: 20 }}>Video Ready:</Text>
-    <Video
-      source={{ uri: videoUrl }} // Utiliza la URL del video
-      style={{ width: '100%', height: 200 }} // Ajusta el tamaño según sea necesario
-      useNativeControls
-      resizeMode="contain"
-      isLooping
-    />
-    <Button title="Play Video" onPress={() => setVideoUrl(videoUrl)} />
-  </View>
-)}
-          </View>
-        );
-      }}
-    />
+              {videoUrl && (
+                <View style={{ marginTop: 20 }}>
+                  <Text style={{ fontSize: 20 }}>Video Ready:</Text>
+                  <Video
+                    source={{ uri: videoUrl }} // Utiliza la URL del video
+                    style={{ width: '100%', height: 200 }} // Ajusta el tamaño según sea necesario
+                    useNativeControls
+                    resizeMode="contain"
+                    isLooping
+                  />
+                  <Button title="Play Video" onPress={() => setVideoUrl(videoUrl)} />
+                </View>
+              )}
+            </View>
+          );
+        }}
+      />
   
       <Snackbar
         visible={snackbarVisible}
@@ -285,7 +300,20 @@ const EventBar = () => {
         {error}
       </Snackbar>
     </View>
-  );
+  );  
 };
 
 export default EventBar;
+
+const styles = StyleSheet.create({
+  featuredEvent: {
+    backgroundColor: '#fef6e4',
+    borderColor: '#ff9900',
+    borderWidth: 2, 
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 5,
+  },
+});

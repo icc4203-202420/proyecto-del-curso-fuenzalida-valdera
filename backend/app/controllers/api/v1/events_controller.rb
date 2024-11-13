@@ -9,7 +9,8 @@ class API::V1::EventsController < ApplicationController
 
   def index
     @events = Event.where(bar_id: params[:bar_id])
-
+    featured_event_id = params[:featured_event_id]
+  
     render json: {
       events: @events.map do |event|
         {
@@ -31,7 +32,8 @@ class API::V1::EventsController < ApplicationController
               image_url: url_for(picture.image),
               description: picture.description
             }
-          end
+          end,
+          is_featured: event.id == featured_event_id
         }
       end
     }

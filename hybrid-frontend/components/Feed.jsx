@@ -53,7 +53,7 @@ const Feed = () => {
           <View key={index} style={styles.post}>
             {/* Mostrar publicaciones de eventos */}
             {post.type === 'event_picture' && (
-              <TouchableOpacity onPress={() => navigation.navigate('EventBar', { id: post.bar_id })}>
+              <TouchableOpacity onPress={() => navigation.navigate('EventBar', { id: post.bar_id, featured_event_id: post.event_id })}>
                 <Text style={styles.title}>{post.event_name || 'No Name Assigned'}</Text>
                 <Text>Posted by: {post.user_name}</Text>
                 <Image source={{ uri: post.image_url }} style={styles.image} />
