@@ -16,6 +16,18 @@ class API::V1::EventPicturesController < ApplicationController
         send_push_notification(user, @event_picture.description, @event)
       end
 
+      ActionCable.server.broadcast "feed_#{current_user.id}", {
+        type: 'new_feed_item',
+        message: 'New event picture added',
+        data: {
+          event_name: @event.name,
+          image_url: url_for(@event_picture.image),
+          description: @event_picture.description,
+          user_name: current_user.handle,
+          created_at: @event_picture.created_at
+        }
+      }
+
       render json: {
         id: @event_picture.id,
         image_url: url_for(@event_picture.image),
