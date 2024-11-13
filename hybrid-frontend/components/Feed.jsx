@@ -55,6 +55,7 @@ const Feed = () => {
             {post.type === 'event_picture' && (
               <TouchableOpacity onPress={() => navigation.navigate('EventBar', { id: post.bar_id })}>
                 <Text style={styles.title}>{post.event_name || 'No Name Assigned'}</Text>
+                <Text>Posted by: {post.user_name}</Text>
                 <Image source={{ uri: post.image_url }} style={styles.image} />
                 <Text>{post.description}</Text>
                 <Text style={styles.date}>Date: {date}</Text>
@@ -65,6 +66,7 @@ const Feed = () => {
             {post.type === 'beer_review' && (
               <TouchableOpacity onPress={() => navigation.navigate('BeerDetail', { beerId: post.beer_id })}>
                 <Text style={styles.title}>{post.beer_name || 'No Beer Name'}</Text>
+                <Text>Reviewed by: {post.user_name}</Text>
                 <Text style={styles.rating}>Rating: {post.rating}</Text>
                 <Text>{post.review_text}</Text>
                 <Text style={styles.date}>Date: {date}</Text>
