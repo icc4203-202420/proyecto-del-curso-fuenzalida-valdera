@@ -55,6 +55,17 @@ class API::V1::ReviewsController < ApplicationController
     review.beer = beer
   
     if review.save
+      ActionCable.server.broadcast "feed_#{current_user.id}", {
+        type: 'new_feed_item',
+        message: 'New review added',
+        data: {
+          beer_name: review.beer.name,
+          rating: review.rating,
+          review_text: review.text,
+          user_name: current_user.handle,
+          created_at: review.created_at
+        }
+      }
       render json: review, status: :created
     else
       render json: { errors: review.errors.full_messages }, status: :unprocessable_entity

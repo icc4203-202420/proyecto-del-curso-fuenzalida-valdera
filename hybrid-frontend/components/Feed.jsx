@@ -15,12 +15,13 @@ const Feed = () => {
       try {
         const token = await SecureStore.getItemAsync('jwtToken');
         const userId = await SecureStore.getItemAsync('userId');
+        
         if (token && userId) {
           const response = await fetch(`${backend_url}/api/v1/feed?user_id=${userId}`, {
             method: 'GET',
             headers: { Authorization: `Bearer ${token}` },
           });
-    
+   
           if (response.ok) {
             const data = await response.json();
             setFeed(data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)));
@@ -28,13 +29,47 @@ const Feed = () => {
             console.error('Failed to fetch feed');
           }    
         }
+        
+        const socket = new WebSocket(`${backend_url.replace('http', 'ws')}/cable`);
+        socket.onopen = () => {
+          console.log('WebSocket connected');
+          socket.send(JSON.stringify({
+            command: 'subscribe',
+            identifier: JSON.stringify({
+              channel: 'FeedChannel',
+              user_id: userId
+            })
+          }));
+        };
+        
+        socket.onmessage = (e) => {
+          const data = JSON.parse(e.data);
+          if (data.message && data.message.type === 'new_feed_item') {
+            fetchFeed();
+          }
+        };
+        
+        socket.onerror = (e) => {
+          console.error('WebSocket Error:', e);
+        };
+        
+        socket.onclose = (e) => {
+          console.log('WebSocket closed:', e);
+          setTimeout(connectWebSocket, 3000);
+        };
+        
+        return () => {
+          socket.close();
+        };
+      } catch (error) {
+        console.error('Error fetching feed:', error);
       } finally {
         setLoading(false);
       }
-    };    
-
+    };
+  
     fetchFeed();
-  }, []);
+  }, []);  
 
   const filteredFeed = filter ? feed.filter((post) => /* filter logic here */ true) : feed;
 
