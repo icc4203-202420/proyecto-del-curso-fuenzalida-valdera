@@ -95,41 +95,6 @@ const BeerDetail = () => {
 
       <Button title="Add Review" onPress={() => navigation.navigate('ReviewForm', { beerId })} />
 
-      <Text style={styles.reviewTitle}>Review</Text>
-
-      {reviewsState.loading ? (
-        <ActivityIndicator size="large" color="#0000ff" />
-      ) : currentReview ? (
-        <View style={styles.reviewCard}>
-          <Text style={styles.rating}>Rating: {currentReview.rating}</Text>
-          <Text>{currentReview.text}</Text>
-        </View>
-      ) : (
-        <Text>No reviews available</Text>
-      )}
-
-      <View style={styles.buttonContainer}>
-        <Button
-          title="Previous"
-          onPress={() => {
-            const newPage = reviewsState.page - 1;
-            if (newPage >= 1) {
-              dispatch({ type: 'SET_PAGE', page: newPage });
-            }
-          }}
-          disabled={reviewsState.page === 1}
-        />
-        <Button
-          title="Next"
-          onPress={() => {
-            const newPage = reviewsState.page + 1;
-            if (newPage <= reviewsState.totalPages) {
-              dispatch({ type: 'SET_PAGE', page: newPage });
-            }
-          }}
-          disabled={reviewsState.page === reviewsState.totalPages}
-        />
-      </View>
     </View>
   );
 };

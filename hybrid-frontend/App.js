@@ -70,12 +70,24 @@ const App = () => {
     </Stack.Navigator>
   );
 
+  const FeedStack = () => (
+    <Stack.Navigator>
+      <Stack.Screen name="Feed" component={Feed} />
+      <Stack.Screen name="EventBar" component={EventBar} />
+      <Stack.Screen name="BeerDetail" component={BeerDetail} />
+    </Stack.Navigator>
+  );
+
   return (
     <PaperProvider>
       <NavigationContainer>
         {isAuthenticated ? (
           <Tab.Navigator>
-            <Tab.Screen name="Feed" component={Feed} />
+            <Tab.Screen 
+              name="Feed"
+              component={FeedStack}
+              options={{ tabBarLabel: 'Feed', headerShown: false }}
+            />
             <Tab.Screen 
               name="Beers" 
               component={BeerStack} 
@@ -104,9 +116,6 @@ const App = () => {
           </Tab.Navigator>
         ) : (
           <Stack.Navigator>
-            <Stack.Screen name="Feed" component={Feed} />
-            <Stack.Screen name="EventBar" component={EventBar} />
-            <Stack.Screen name="BeerDetail" component={BeerDetail} />
             <Stack.Screen name="Login">
               {props => <Login {...props} setIsAuthenticated={setIsAuthenticated} />}
             </Stack.Screen>
