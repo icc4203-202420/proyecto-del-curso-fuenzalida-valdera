@@ -55,7 +55,6 @@ const Feed = () => {
         
         socket.onclose = (e) => {
           console.log('WebSocket closed:', e);
-          setTimeout(connectWebSocket, 3000);
         };
         
         return () => {
