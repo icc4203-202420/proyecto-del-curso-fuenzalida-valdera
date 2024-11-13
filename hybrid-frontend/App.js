@@ -72,7 +72,7 @@ const App = () => {
 
   const FeedStack = () => (
     <Stack.Navigator>
-      <Stack.Screen name="Feed" component={Feed} />
+      <Stack.Screen name="FeedScreen" component={Feed} />
       <Stack.Screen name="EventBar" component={EventBar} />
       <Stack.Screen name="BeerDetail" component={BeerDetail} />
     </Stack.Navigator>
@@ -84,7 +84,7 @@ const App = () => {
         {isAuthenticated ? (
           <Tab.Navigator>
             <Tab.Screen 
-              name="Feed"
+              name="FeedTab"
               component={FeedStack}
               options={{ tabBarLabel: 'Feed', headerShown: false }}
             />
