@@ -1,4 +1,6 @@
 class API::V1::FeedController < ApplicationController
+  include Rails.application.routes.url_helpers # Para usar `url_for` con ActiveStorage
+
   def index
     user_id = params[:user_id]
     if user_id.nil?
@@ -10,37 +12,47 @@ class API::V1::FeedController < ApplicationController
       render json: { error: 'Invalid user ID' }, status: :unauthorized and return
     end
 
+    # Obtener IDs de amigos
     friend_ids = current_user.friends.pluck(:id)
 
+    # Obtener publicaciones de eventos de usuario y amigos
+    event_pictures = EventPicture.includes(:event, :user)
+      .where(user_id: friend_ids) # Eliminar el ID del usuario actual
+      .order(created_at: :desc)
 
-    event_pictures = EventPicture.includes(:event, :user).where(user_id: [current_user.id, *friend_ids]).order(created_at: :desc)
-    reviews = Review.includes(:user, :beer).where(user_id: [current_user.id, *friend_ids]).order(created_at: :desc)
+    # Obtener reseñas de cervezas de usuario y amigos
+    reviews = Review.includes(:user, :beer)
+      .where(user_id: friend_ids) # Eliminar el ID del usuario actual
+      .order(created_at: :desc)
 
+    # Formatear el feed
     feed = event_pictures.map do |event_picture|
       {
         type: 'event_picture',
-        image_url: url_for(event_picture.image),
+        image_url: event_picture.image.attached? ? url_for(event_picture.image) : nil, # Evitar error si la imagen no está adjunta
         description: event_picture.description,
         created_at: event_picture.created_at.iso8601,
-        event_name: event_picture.event.name,
-        user_name: event_picture.user.handle,
-        bar_id: event_picture.event.bar_id,
+        event_name: event_picture.event&.name, # Usa `&.` para evitar error si `event` es nil
+        user_name: event_picture.user&.handle,
+        bar_id: event_picture.event&.bar_id,
         event_id: event_picture.event_id
       }
     end
 
+    # Agregar reseñas al feed
     reviews.each do |review|
       feed.push({
         type: 'beer_review',
-        beer_name: review.beer.name,
+        beer_name: review.beer&.name, # Usa `&.` para evitar error si `beer` es nil
         rating: review.rating,
         review_text: review.text,
         created_at: review.created_at.iso8601,
-        user_name: review.user.handle,
-        beer_id: review.beer.id
+        user_name: review.user&.handle,
+        beer_id: review.beer_id
       })
     end
 
+    # Ordenar el feed por fecha de creación
     feed.sort_by! { |post| post[:created_at] }.reverse!
 
     render json: feed

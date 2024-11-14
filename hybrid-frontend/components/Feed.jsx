@@ -7,7 +7,6 @@ import { useNavigation } from '@react-navigation/native';
 const Feed = () => {
   const [feed, setFeed] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState(null);
   const navigation = useNavigation();
 
   useEffect(() => {
@@ -21,7 +20,7 @@ const Feed = () => {
             method: 'GET',
             headers: { Authorization: `Bearer ${token}` },
           });
-   
+
           if (response.ok) {
             const data = await response.json();
             setFeed(data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)));
@@ -70,16 +69,13 @@ const Feed = () => {
     fetchFeed();
   }, []);  
 
-  const filteredFeed = filter ? feed.filter((post) => /* filter logic here */ true) : feed;
-
   if (loading) {
     return <ActivityIndicator size="large" color="#0000ff" />;
   }
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Button title="Filter" onPress={() => setFilter(/* filter logic here, yep, not done yet haha */)} />
-      {filteredFeed.map((post, index) => {
+      {feed.map((post, index) => {
         const formattedDate = new Date(post.created_at);
         const date = isNaN(formattedDate) ? 'Invalid Date' : formattedDate.toLocaleString();
 
