@@ -3,6 +3,7 @@ import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native'
 import * as Yup from 'yup'
 import { Formik } from 'formik'
 import axios from 'axios'
+import { backend_url } from '@env';
 
 const Register = ({ navigation }) => {
   const [serverError, setServerError] = useState('')
@@ -21,7 +22,7 @@ const Register = ({ navigation }) => {
 
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
-      const response = await axios.post('http://localhost:3001/api/v1/signup', {
+      const response = await axios.post(`${backend_url}/api/v1/signup`, {
         user: values
       })
       setSuccessMessage('Welcome to PintPals! Please log in.')

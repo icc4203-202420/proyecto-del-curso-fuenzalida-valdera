@@ -21,6 +21,7 @@ Rails.application.routes.draw do
 
   namespace :api, defaults: { format: :json } do
     namespace :v1 do
+      get 'feed/friends', to: 'feed#friends'
       resources :bars do
         resources :events, only: [:index, :show, :create, :update, :destroy] do
           resources :event_pictures, only: [:create]
