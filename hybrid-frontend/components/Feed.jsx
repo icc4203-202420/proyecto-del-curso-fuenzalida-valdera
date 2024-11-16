@@ -142,10 +142,8 @@ const Feed = () => {
             method: 'GET',
             headers: { Authorization: `Bearer ${token}` },
           });
-          console.log(response.status); // Verifica el código de estado de la respuesta
           if (response.ok) {
             const beer_data = await response.json();
-            console.log('Beers fetched:', beer_data); // Verifica los datos obtenidos
             setBeers(beer_data.beers);
           } else {
             console.error('Failed to fetch beers:', response.status);
@@ -161,24 +159,22 @@ const Feed = () => {
     fetchFeed();
     fetchFriends();
     fetchBars();
-    fetchBeers(); // Para depurar
-  }, [filter]); // Dependencia en el filtro para hacer la solicitud cada vez que se cambia el filtro
+    fetchBeers();
+  }, [filter]);
 
-  // Función para filtrar las publicaciones por el amigo seleccionado
   const handleFilterByFriend = (friendId) => {
     setFilter((prevFilter) => ({ ...prevFilter, friend_id: friendId })); // Actualizar el filtro con el ID del amigo
-    setShowFilterModal(false); // Cerrar el modal después de seleccionar el amigo
+    setShowFilterModal(false);
   };
 
-  // Función para filtrar las publicaciones por el bar seleccionado
   const handleFilterByBar = (barId) => {
     setFilter((prevFilter) => ({ ...prevFilter, bar_id: barId })); // Actualizar el filtro con el ID del bar
-    setShowBarFilterModal(false); // Cerrar el modal después de seleccionar el bar
+    setShowBarFilterModal(false);
   };
 
   const handleFilterByBeer = (beerId) => {
     setFilter((prevFilter) => ({ ...prevFilter, beer_id: beerId })); // Actualizar el filtro con el ID del bar
-    setShowBeerFilterModal(false); // Cerrar el modal después de seleccionar el bar
+    setShowBeerFilterModal(false);
   };
 
   // Función para limpiar el filtro
