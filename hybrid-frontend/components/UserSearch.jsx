@@ -3,7 +3,6 @@ import { View, Text, Button, FlatList, Image, TextInput, ScrollView, Alert, Touc
 import axios from 'axios';
 import { Modal } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
-import AsyncStorage from '@react-native-async-storage/async-storage'
 import { backend_url } from '@env';
 
 const UserSearch = () => {
@@ -19,11 +18,11 @@ const UserSearch = () => {
   useEffect(() => {
     const fetchUserId = async () => {
       try {
-        const storedUserId = await AsyncStorage.getItem('userId');
-        if (storedUserId) {
-          setCurrentUserId(Number(storedUserId)); // Cambiado a setCurrentUserId
+        const userId = await SecureStore.getItemAsync('userId');
+        if (userId) {
+          setCurrentUserId(Number(userId));
         } else {
-          setError('User ID not found in AsyncStorage');
+          setError('User ID not found in SecureStore');
         }
       } catch (error) {
         console.error('Error fetching user ID from SecureStore:', error);
