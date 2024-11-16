@@ -52,6 +52,37 @@ const Feed = () => {
             setLoading(false);
           }
         }
+
+        const socket = new WebSocket(`${backend_url.replace('http', 'ws')}/cable`);
+        socket.onopen = () => {
+          console.log('WebSocket connected');
+          socket.send(JSON.stringify({
+            command: 'subscribe',
+            identifier: JSON.stringify({
+              channel: 'FeedChannel',
+              user_id: userId
+            })
+          }));
+        };
+        
+        socket.onmessage = (e) => {
+          const data = JSON.parse(e.data);
+          if (data.message && data.message.type === 'new_feed_item') {
+            fetchFeed();
+          }
+        };
+        
+        socket.onerror = (e) => {
+          console.error('WebSocket Error:', e);
+        };
+        
+        socket.onclose = (e) => {
+          console.log('WebSocket closed:', e);
+        };
+        
+        return () => {
+          socket.close();
+        };
       } catch (error) {
         console.error('Error fetching feed:', error);
         setLoading(false);
