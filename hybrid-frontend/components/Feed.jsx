@@ -9,7 +9,11 @@ const Feed = () => {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState({ friend_id: null, bar_id: null, country: null, beer_id: null });
   const [friends, setFriends] = useState([]);
+  const [bars, setBars] = useState([]);
+  const [beers, setBeers] = useState([]);
   const [showFilterModal, setShowFilterModal] = useState(false);
+  const [showBarFilterModal, setShowBarFilterModal] = useState(false);
+  const [showBeerFilterModal, setShowBeerFilterModal] = useState(false);
   const navigation = useNavigation();
 
   useEffect(() => {
@@ -76,14 +80,74 @@ const Feed = () => {
       }
     };
 
+    // Función para obtener la lista de bares
+    const fetchBars = async () => {
+      try {
+        const token = await SecureStore.getItemAsync('jwtToken');
+        const userId = await SecureStore.getItemAsync('userId');
+        if (token && userId) {
+          const response = await fetch(`${backend_url}/api/v1/bars?user_id=${userId}`, {
+            method: 'GET',
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (response.ok) {
+            const data = await response.json();
+            setBars(data);
+          } else {
+            console.error('Failed to fetch bars');
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching bars:', error);
+      }
+    };
+
+    const fetchBeers = async () => {
+      try {
+        const token = await SecureStore.getItemAsync('jwtToken');
+        const userId = await SecureStore.getItemAsync('userId');
+        if (token && userId) {
+          const response = await fetch(`${backend_url}/api/v1/beers?user_id=${userId}`, {
+            method: 'GET',
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          console.log(response.status); // Verifica el código de estado de la respuesta
+          if (response.ok) {
+            const beer_data = await response.json();
+            console.log('Beers fetched:', beer_data); // Verifica los datos obtenidos
+            setBeers(beer_data.beers);
+          } else {
+            console.error('Failed to fetch beers:', response.status);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching beers:', error);
+      }
+    };
+    
+
+
     fetchFeed();
     fetchFriends();
+    fetchBars();
+    fetchBeers(); // Para depurar
   }, [filter]); // Dependencia en el filtro para hacer la solicitud cada vez que se cambia el filtro
 
   // Función para filtrar las publicaciones por el amigo seleccionado
   const handleFilterByFriend = (friendId) => {
     setFilter((prevFilter) => ({ ...prevFilter, friend_id: friendId })); // Actualizar el filtro con el ID del amigo
     setShowFilterModal(false); // Cerrar el modal después de seleccionar el amigo
+  };
+
+  // Función para filtrar las publicaciones por el bar seleccionado
+  const handleFilterByBar = (barId) => {
+    setFilter((prevFilter) => ({ ...prevFilter, bar_id: barId })); // Actualizar el filtro con el ID del bar
+    setShowBarFilterModal(false); // Cerrar el modal después de seleccionar el bar
+  };
+
+  const handleFilterByBeer = (beerId) => {
+    setFilter((prevFilter) => ({ ...prevFilter, beer_id: beerId })); // Actualizar el filtro con el ID del bar
+    setShowBeerFilterModal(false); // Cerrar el modal después de seleccionar el bar
   };
 
   // Función para limpiar el filtro
@@ -99,6 +163,8 @@ const Feed = () => {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Button title="Filter by Friend" onPress={() => setShowFilterModal(true)} />
+      <Button title="Filter by Bar" onPress={() => setShowBarFilterModal(true)} /> {/* Botón para filtro por bar */}
+      <Button title="Filter by Beer" onPress={() => setShowBeerFilterModal(true)} />
       
       {/* Botón para limpiar el filtro */}
       <Button title="Clear Filter" onPress={handleClearFilter} />
@@ -120,6 +186,44 @@ const Feed = () => {
         </View>
       </Modal>
 
+
+      <Modal visible={showBeerFilterModal} animationType="slide">
+        <View style={styles.modalContainer}>
+        <Button title="Close" onPress={() => setShowBeerFilterModal(false)} />
+          <Text style={styles.modalTitle}>Select a Beer</Text>
+          <FlatList
+            data={beers}
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={({ item }) => (
+              <TouchableOpacity onPress={() => handleFilterByBeer(item.id)} style={styles.friendItem}>
+                <Text>{item.name}</Text>
+              </TouchableOpacity>
+            )}
+          />
+          <Button title="Close" onPress={() => setShowBeerFilterModal(false)} />
+        </View>
+      </Modal>
+
+      {/* Modal de selección de bar */}
+      <Modal visible={showBarFilterModal} animationType="slide">
+        <View style={styles.modalContainer}>
+        <Button title="Close" onPress={() => setShowBarFilterModal(false)} />
+          <Text style={styles.modalTitle}>Select a Bar</Text>
+          <FlatList
+            data={bars}
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={({ item }) => (
+              <TouchableOpacity onPress={() => handleFilterByBar(item.id)} style={styles.friendItem}>
+                <Text>{item.name}</Text>
+              </TouchableOpacity>
+            )}
+          />
+          <Button title="Close" onPress={() => setShowBarFilterModal(false)} />
+        </View>
+      </Modal>
+
+
+
       {/* Mostrar las publicaciones filtradas o completas */}
       {feed.length === 0 ? (
         <Text>No posts found for this filter</Text>
@@ -132,6 +236,7 @@ const Feed = () => {
               {post.type === 'event_picture' && (
                 <TouchableOpacity onPress={() => navigation.navigate('EventBar', { id: post.bar_id, featured_event_id: post.event_id })}>
                   <Text style={styles.title}>{post.event_name || 'No Name Assigned'}</Text>
+                  <Text style={styles.title}>{post.bar_id || 'No Name Assigned'}</Text>
                   <Text>Posted by: {post.user_name}</Text>
                   <Image source={{ uri: post.image_url }} style={styles.image} />
                   <Text>{post.description}</Text>
@@ -157,14 +262,13 @@ const Feed = () => {
 
 const styles = StyleSheet.create({
   container: { padding: 10 },
-  post: { marginBottom: 15, padding: 10, backgroundColor: '#f0f0f0', borderRadius: 5 },
-  title: { fontSize: 18, fontWeight: 'bold' },
-  image: { width: '100%', height: 200, borderRadius: 5, marginBottom: 10 },
-  rating: { color: '#ff9900', fontWeight: 'bold' },
-  date: { color: '#888', marginTop: 5 },
-  modalContainer: { flex: 1, justifyContent: 'center', padding: 20 },
-  modalTitle: { fontSize: 20, fontWeight: 'bold', marginBottom: 20 },
-  friendItem: { padding: 10, borderBottomWidth: 1, borderBottomColor: '#ddd' },
+  post: { marginBottom: 20 },
+  title: { fontWeight: 'bold', fontSize: 16 },
+  image: { width: '100%', height: 200, marginVertical: 10 },
+  date: { fontSize: 12, color: 'gray' },
+  modalContainer: { padding: 20 },
+  modalTitle: { fontSize: 20, fontWeight: 'bold', marginBottom: 10 },
+  friendItem: { padding: 10, borderBottomWidth: 1, borderColor: '#ccc' },
 });
 
 export default Feed;

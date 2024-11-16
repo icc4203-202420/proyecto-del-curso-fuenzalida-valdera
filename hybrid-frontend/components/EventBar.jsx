@@ -258,14 +258,55 @@ const EventBar = () => {
                   <Text>No attendees for this event</Text>
                 )}
               </ScrollView>
-  
-              {isEventPast ? (
-                <Button title="Summary" onPress={() => handleGenerateSummary(event.id)} />
-              ) : (
-                <>
-                  <Button title="Check In" onPress={() => handleCheckIn(event.id)} />
-                  <Button title="Upload Image" onPress={() => handleUploadImage(event.id, userId)} />
-                  <Button title="Select Image" onPress={handleSelectImage} />
+                
+                {isEventPast ? (
+                  <Button title="Summary" onPress={() => handleGenerateSummary(event.id)} />
+                ) : (
+                  <>
+                    <Button title="Check In" onPress={() => handleCheckIn(event.id)} />
+
+                    <TextInput
+                      placeholder="Image description"
+                      value={imageDescription}
+                      onChangeText={setImageDescription}
+                      style={{ borderWidth: 1, borderColor: '#ccc', borderRadius: 8, padding: 10, marginTop: 10 }}
+                    />
+
+                    <DropDownPicker
+                      open={dropdownOpen}
+                      setOpen={setDropdownOpen}
+                      value={selectedUser}
+                      setValue={setSelectedUser}
+                      items={dropdownItems}
+                      placeholder="Select user"
+                      containerStyle={{ marginBottom: 10 }}
+                      onChangeValue={handleUserSelect} // Utiliza la función aquí
+                    />
+
+                    {selectedUser && (
+                      <Text style={{ color: 'blue', marginTop: 10 }}>
+                        {selectedUser}{/* Mostrar descripción con el usuario seleccionado */}
+                      </Text>
+                    )}
+
+                    <Button title="Select Image" onPress={handleSelectImage} />
+                    {selectedImage && <Image source={{ uri: selectedImage.uri }} style={{ width: 200, height: 200, marginTop: 10 }} />}
+
+                    <Button
+                      title="Upload Image"
+                      onPress={() => handleUploadImage(event.id, userId)}
+                      disabled={!selectedImage}
+                    />
+                    {event.event_pictures && event.event_pictures.length > 0 && (
+                      <ScrollView horizontal style={{ maxHeight: 200, marginTop: 10 }}>
+                        {event.event_pictures.map((picture) => (
+                          <View key={picture.id} style={{ marginRight: 10 }}>
+                            <Image source={{ uri: picture.image_url }} style={{ width: 100, height: 100, borderRadius: 8 }} />
+                            <Text>{picture.description}</Text>
+                          </View>
+                        ))}
+                      </ScrollView>
+                  )}
                 </>
               )}
               {videoUrl && (

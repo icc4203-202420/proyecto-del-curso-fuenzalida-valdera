@@ -3,39 +3,33 @@ class API::V1::FeedController < ApplicationController
 
   def index
     friend_ids = get_friend_ids(params[:friend_id])
+    user_ids = params[:friend_id].present? ? friend_ids : [@current_user.id, *friend_ids]
 
-    # Si hay un `friend_id` presente, se debe excluir al usuario actual
-    if params[:friend_id].present?
-      # Solo mostrar contenido relacionado con el amigo especificado, excluyendo al usuario actual
-      event_pictures = EventPicture.includes(:event, :user)
-                                   .where(user_id: friend_ids)
-                                   .order(created_at: :desc)
-
-      reviews = Review.includes(:user, :beer)
-                      .where(user_id: friend_ids)
-                      .order(created_at: :desc)
+    # Obtener las publicaciones relacionadas
+    event_pictures = if params[:beer_id].present?
+      Review.none
     else
-      # Si no hay `friend_id`, mostrar eventos y reseñas tanto del usuario como de sus amigos
-      event_pictures = EventPicture.includes(:event, :user)
-                                   .where(user_id: [@current_user.id, *friend_ids])
-                                   .order(created_at: :desc)
-
-      reviews = Review.includes(:user, :beer)
-                      .where(user_id: [@current_user.id, *friend_ids])
-                      .order(created_at: :desc)
+      EventPicture.includes(:event, :user)
+                                 .where(user_id: user_ids)
+                                 .order(created_at: :desc)
     end
 
-    # Aplicar filtros adicionales a las `event_pictures` y `reviews`
+    # Si se filtra por bar_id, no incluir reseñas
+    reviews = if params[:bar_id].present?
+      Review.none # Devuelve una relación vacía que permite usar métodos como `where`
+    else
+      Review.includes(:user, :beer)
+            .where(user_id: user_ids)
+            .order(created_at: :desc)
+    end
+
+
+    # Filtrar publicaciones
     event_pictures = filter_event_pictures(event_pictures)
+    reviews = reviews.where(beer_id: params[:beer_id]) if params[:beer_id].present?
 
-    if params[:beer_id].present?
-      reviews = reviews.where(beer_id: params[:beer_id])
-    end
-
-    # Construir el feed
+    # Construir y ordenar el feed
     feed = build_feed(event_pictures, reviews)
-
-    # Ordenar el feed por fecha
     feed.sort_by! { |post| post[:created_at] }.reverse!
 
     render json: feed
