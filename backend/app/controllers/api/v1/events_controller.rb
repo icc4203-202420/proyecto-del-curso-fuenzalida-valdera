@@ -3,12 +3,13 @@ class API::V1::EventsController < ApplicationController
   include Authenticable
 
   respond_to :json
-  before_action :set_event, only: [:show, :update, :destroy]
+  before_action :set_event, only: [:show, :update, :destroy, :generate_summary]
   before_action :verify_jwt_token, only: [:create, :update, :destroy]
   before_action :authenticate_user!, only: [:create, :update, :destroy]
 
   def index
     @events = Event.where(bar_id: params[:bar_id])
+    featured_event_id = params[:featured_event_id]
 
     render json: {
       events: @events.map do |event|
@@ -17,7 +18,7 @@ class API::V1::EventsController < ApplicationController
           name: event.name,
           description: event.description,
           date: event.date,
-          flyer_url: event.flyer.attached? ? url_for(event.flyer) : nil,  # Asegura que se incluya la URL del flyer
+          flyer_url: event.flyer.attached? ? url_for(event.flyer) : nil,
           attendees: event.users.map do |user|
             {
               id: user.id,
@@ -28,19 +29,19 @@ class API::V1::EventsController < ApplicationController
           event_pictures: event.event_pictures.map do |picture|
             {
               id: picture.id,
-              image_url: url_for(picture.image),  # Asegura que se incluya la URL de las imágenes de los eventos
+              image_url: url_for(picture.image),
               description: picture.description
             }
-          end
+          end,
+          is_featured: event.id == featured_event_id
         }
       end
     }
   end
 
-
   def show
     address = Address.find_by(id: Bar.find_by(id: @event.bar_id).address_id)
-    @event_pictures = @event.event_pictures # Get all event pictures associated with the event
+    @event_pictures = @event.event_pictures
     Rails.logger.info "Addresses are: #{address}"
 
     event_pictures_data = @event_pictures.map do |picture|
@@ -89,41 +90,66 @@ class API::V1::EventsController < ApplicationController
 
   def check_in
     event = Event.find_by(id: params[:id])
-  
+
     if event.nil?
       render json: { success: false, message: 'Event not found' }, status: :not_found
       return
     end
-  
-    # Usa el user_id enviado en los parámetros
+
     user_id = params[:user_id]
-  
-    # Encuentra al usuario basado en el user_id proporcionado
     user = User.find_by(id: user_id)
-  
+
     if user.nil?
       render json: { success: false, message: 'User not found' }, status: :not_found
       return
     end
-  
+
     attendance = Attendance.find_or_initialize_by(user_id: user.id, event_id: event.id)
-  
+
     if attendance.checked_in
       render json: { success: false, message: 'Already checked in' }, status: :unprocessable_entity
     else
       if attendance.update(checked_in: true)
+        # Enviar notificación a todos los amigos del usuario
+        user.friends.each do |friend|
+          next if friend.push_token.blank? # Saltar si el amigo no tiene un token de notificaciones
+
+          PushNotificationService.send_notification(
+            to: friend.push_token,
+            title: "Tu amigo está en un evento",
+            body: "El usuario #{user.handle} acaba de hacer check-in en #{event.name}.",
+            data: { screen: "Event", event_id: event.id }
+          )
+        end
+
         render json: { success: true, message: 'Checked in successfully' }, status: :ok
       else
         render json: { success: false, message: 'Failed to check in' }, status: :unprocessable_entity
       end
     end
-  end  
+  end
+
+
+  def generate_summary
+    # Use the instance variable set by before_action
+    event = @event
+    Rails.logger.debug("Parameters: #{params.inspect}")
+
+    # Actualizar la URL del video para que apunte a la nueva ubicación
+    video_url = "#{request.protocol}#{request.host_with_port}/videos/event_#{event.id}.mp4"
+
+    # Start the background job for video generation
+    GenerateVideoSummaryJob.perform_later(event.id)
+    Rails.logger.debug(video_url)
+
+    # Return the video URL (it may not be ready yet)
+    render json: { success: true, message: "Video generation started.", video_url: video_url }
+  end
 
   private
 
   def set_event
-    @event = Event.find_by(id: params[:id])
-    render json: { error: 'event not found' }, status: :not_found if @event.nil?
+    @event = Event.find(params[:id])
   end
 
   def event_params
@@ -140,5 +166,19 @@ class API::V1::EventsController < ApplicationController
   def verify_jwt_token
     authenticate_user!
     head :unauthorized unless current_user
+  end
+
+  def create_event_summary(event)
+    # Implementar la lógica para crear el resumen aquí
+    # Por ejemplo, simular que se generó un resumen exitoso
+    { success: true }
+  end
+
+  def send_notifications(event)
+    attendees = event.users
+
+    attendees.each do |user|
+      NotificationService.send_summary_notification(user, event)
+    end
   end
 end

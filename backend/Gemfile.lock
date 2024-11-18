@@ -169,6 +169,7 @@ GEM
     mini_mime (1.1.5)
     minitest (5.24.1)
     msgpack (1.7.2)
+    multi_json (1.15.0)
     mutex_m (0.2.0)
     net-imap (0.4.14)
       date
@@ -290,6 +291,8 @@ GEM
     sqlite3 (1.7.3-x86-linux)
     sqlite3 (1.7.3-x86_64-darwin)
     sqlite3 (1.7.3-x86_64-linux)
+    streamio-ffmpeg (3.0.2)
+      multi_json (~> 1.8)
     stringio (3.1.1)
     strscan (3.1.0)
     thor (1.3.1)
@@ -330,6 +333,7 @@ DEPENDENCIES
   image_processing (~> 1.2)
   jbuilder
   jsonapi-serializer
+  mini_magick
   pry (~> 0.14.2)
   pry-byebug
   pry-rails
@@ -340,6 +344,7 @@ DEPENDENCIES
   rails-erd
   rspec-rails
   sqlite3 (~> 1.4)
+  streamio-ffmpeg
   tzinfo-data
 
 RUBY VERSION

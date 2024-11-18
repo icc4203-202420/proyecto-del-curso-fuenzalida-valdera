@@ -9,4 +9,9 @@ class Event < ApplicationRecord
   def thumbnail
     flyer.variant(resize_to_limit: [200, nil]).processed
   end
+  after_create :notify_video_ready
+
+  def notify_video_ready
+    ActionCable.server.broadcast("video_notification_channel", { type: 'video_ready', message: 'Your video is ready for viewing!' })
+  end
 end

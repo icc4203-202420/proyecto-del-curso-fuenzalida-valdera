@@ -21,15 +21,19 @@ Rails.application.routes.draw do
 
   namespace :api, defaults: { format: :json } do
     namespace :v1 do
+      get 'feed/friends', to: 'feed#friends'
       resources :bars do
         resources :events, only: [:index, :show, :create, :update, :destroy] do
           resources :event_pictures, only: [:create]
           post 'check_in', on: :member
+          post 'generate_summary', on: :member
         end
       end
+
       resources :beers do
         resources :reviews, only: [:index, :create]
       end
+
       resources :users do
         resources :reviews, only: [:index]
         member do
@@ -39,7 +43,7 @@ Rails.application.routes.draw do
       end
 
       resources :reviews, only: [:index, :show, :create, :update, :destroy]
+      get 'feed', to: 'feed#index'
     end
   end
-
 end
