@@ -10,7 +10,7 @@ class API::V1::EventsController < ApplicationController
   def index
     @events = Event.where(bar_id: params[:bar_id])
     featured_event_id = params[:featured_event_id]
-  
+
     render json: {
       events: @events.map do |event|
         {
@@ -110,12 +110,25 @@ class API::V1::EventsController < ApplicationController
       render json: { success: false, message: 'Already checked in' }, status: :unprocessable_entity
     else
       if attendance.update(checked_in: true)
+        # Enviar notificación a todos los amigos del usuario
+        user.friends.each do |friend|
+          next if friend.push_token.blank? # Saltar si el amigo no tiene un token de notificaciones
+
+          PushNotificationService.send_notification(
+            to: friend.push_token,
+            title: "Tu amigo está en un evento",
+            body: "El usuario #{user.handle} acaba de hacer check-in en #{event.name}.",
+            data: { screen: "Event", event_id: event.id }
+          )
+        end
+
         render json: { success: true, message: 'Checked in successfully' }, status: :ok
       else
         render json: { success: false, message: 'Failed to check in' }, status: :unprocessable_entity
       end
     end
   end
+
 
   def generate_summary
     # Use the instance variable set by before_action
