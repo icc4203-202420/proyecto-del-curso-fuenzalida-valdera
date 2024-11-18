@@ -48,6 +48,15 @@ class API::V1::UsersController < ApplicationController
 
     if friendship.save
       render json: friendship, status: :created
+
+      if friend.push_token.present?
+        PushNotificationService.send_notification(
+          to: friend.push_token,
+          title: "Has recibido peticion de amistad!",
+          body: "El usuario #{user.handle} quiere ser tu amigo.",
+          data: { screen: "Main" }
+        )
+      end
     else
       render json: friendship.errors, status: :unprocessable_entity
     end
@@ -61,7 +70,7 @@ class API::V1::UsersController < ApplicationController
 
   def user_params
     params.fetch(:user, {}).permit(
-      :id, :first_name, :last_name, :email, :age,
+      :id, :first_name, :last_name, :email, :age, :push_token,
       { address_attributes: [:id, :line1, :line2, :city, :country, :country_id,
         country_attributes: [:id, :name]],
         reviews_attributes: [:id, :text, :rating, :beer_id, :_destroy]

@@ -16,17 +16,7 @@ class API::V1::EventPicturesController < ApplicationController
         send_push_notification(user, @event_picture.description, @event)
       end
 
-      ActionCable.server.broadcast "feed_#{current_user.id}", {
-        type: 'new_feed_item',
-        message: 'New event picture added',
-        data: {
-          event_name: @event.name,
-          image_url: url_for(@event_picture.image),
-          description: @event_picture.description,
-          user_name: current_user.handle,
-          created_at: @event_picture.created_at
-        }
-      }
+
 
       render json: {
         id: @event_picture.id,
@@ -47,20 +37,13 @@ class API::V1::EventPicturesController < ApplicationController
 
   # Método para enviar la notificación push
   def send_push_notification(user, description, event)
-    # Suponiendo que tienes una columna `notification_token` en el modelo User para almacenar el token de notificación
-    return unless user.notification_token
-
-    message = {
-      to: user.notification_token,
-      notification: {
-        title: "¡Has sido mencionado en un evento!",
-        body: "#{description}",
-        data: {
-          event_id: event.id,
-          event_name: event.name
-        }
-      }
-    }
+    # Suponiendo que tienes una columna `push_token` en el modelo User para almacenar el token de notificación
+    PushNotificationService.send_notification(
+          to: user.push_token,
+          title: "Has recibido peticion de amistad!",
+          body: "Te han etiquetado.",
+          data: { screen: "Main" }
+        )
 
     # Aquí usas el servicio de notificación, como Firebase Cloud Messaging (FCM)
     Firebase::Messaging.send(message)

@@ -4,6 +4,7 @@ import * as Yup from 'yup'
 import { Formik } from 'formik'
 import axios from 'axios'
 import { backend_url } from '@env';
+import { registerForPushNotificationsAsync } from "../util/notifications";
 
 const Register = ({ navigation }) => {
   const [serverError, setServerError] = useState('')
@@ -22,8 +23,10 @@ const Register = ({ navigation }) => {
 
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
+      const pushToken = await registerForPushNotificationsAsync()
+      const update_values = { ...values, push_token: pushToken }
       const response = await axios.post(`${backend_url}/api/v1/signup`, {
-        user: values
+        user: update_values
       })
       setSuccessMessage('Welcome to PintPals! Please log in.')
       setServerError('')

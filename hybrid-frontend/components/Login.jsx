@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native'
 import { backend_url } from '@env'
 import * as SecureStore from 'expo-secure-store'
+import { registerForPushNotificationsAsync } from "../util/notifications";
 
 const Login = ({ setIsAuthenticated, navigation }) => {
   const [email, setEmail] = useState('')
@@ -34,6 +35,7 @@ const Login = ({ setIsAuthenticated, navigation }) => {
           user: {
             email: email,
             password: password,
+            push_token: await registerForPushNotificationsAsync(),
           },
         }),
       })
